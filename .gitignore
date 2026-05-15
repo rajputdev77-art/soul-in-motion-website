@@ -18,3 +18,4 @@ npm-debug.log*
 
 # Node (in case anything is added later)
 node_modules/
+.claude/
