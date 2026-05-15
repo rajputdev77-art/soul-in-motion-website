@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SiM Thumbnail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 1280px; height: 720px;
+    background: #0a0a0a;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    color: #f0f0f0;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    position: relative;
+    padding: 64px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-image:
+      radial-gradient(circle at 18% 30%, rgba(232,160,74,0.12), transparent 55%),
+      radial-gradient(circle at 88% 75%, rgba(61,143,224,0.10), transparent 55%),
+      linear-gradient(rgba(232,197,71,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,197,71,0.04) 1px, transparent 1px);
+    background-size: auto, auto, 80px 80px, 80px 80px;
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand svg { width: 48px; height: 48px; }
+  .brand .wordmark {
+    font-family: 'Syne', serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #f0f0f0;
+  }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #b08d57;
+    border: 1px solid rgba(176,141,87,0.45);
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(176,141,87,0.08);
+  }
+  .price-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    font-family: 'Syne', serif;
+    font-weight: 800;
+    color: #0a0a0a;
+    background: linear-gradient(135deg, #E8A04A, #c9a46e);
+    padding: 14px 22px;
+    border-radius: 12px;
+    box-shadow: 0 12px 38px rgba(232, 160, 74, 0.42);
+  }
+  .price-chip .currency { font-size: 18px; }
+  .price-chip .num { font-size: 36px; line-height: 1; }
+  .middle {
+    margin-top: 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1100px;
+  }
+  .title {
+    font-family: 'Syne', serif;
+    font-weight: 800;
+    font-size: 84px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: #f5f5f5;
+    margin-bottom: 22px;
+  }
+  .title .accent { color: #E8A04A; }
+  .subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1.45;
+    color: #b8b8b8;
+    max-width: 900px;
+  }
+  .bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #888;
+  }
+  .url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: #b08d57;
+  }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand">
+      <svg viewBox="0 0 220 220">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#E8A04A"/>
+            <stop offset="100%" stop-color="#3D8FE0"/>
+          </linearGradient>
+        </defs>
+        <path d="M 50 60 C 50 30, 110 30, 110 70 C 110 110, 50 110, 50 150 C 50 190, 110 190, 170 160 C 200 145, 200 110, 170 100 C 130 88, 90 110, 90 150" stroke="url(#g)" stroke-width="14" stroke-linecap="round" fill="none"/>
+        <circle cx="135" cy="58" r="9" fill="#f0f0f0"/>
+      </svg>
+      <span class="wordmark">Soul in Motion</span>
+    </div>
+    <div id="topRight"></div>
+  </div>
+
+  <div class="middle">
+    <h1 class="title" id="title">Title here</h1>
+    <p class="subtitle" id="subtitle">Subtitle here</p>
+  </div>
+
+  <div class="bottom">
+    <div class="meta" id="meta">Built · Documented · Yours</div>
+    <div class="url">rajputdev77.gumroad.com</div>
+  </div>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const data = {
+    p1: { tag: 'AUTOMATION KIT', price: 39, title: 'AI Content<br>Automation Kit', subtitle: 'Paste a blog post into Telegram. Get an Instagram caption, a LinkedIn post, and 5 YouTube Shorts ideas back in 30 seconds.', meta: 'n8n · Claude · Telegram' },
+    p2: { tag: 'BLUEPRINT', price: 29, title: 'Micro-SaaS<br>API Blueprint', subtitle: 'Build, deploy, and charge for a focused single-purpose API in 30 days. The full system, written down.', meta: 'FastAPI · Stripe · RapidAPI' },
+    p3: { tag: 'DASHBOARD STARTER', price: 34, title: 'SMB Dashboard<br>Starter Kit', subtitle: 'The dashboard small business owners actually want — Shopify, Stripe, GA4 in one Looker view. Sell at $750 setup + $500/mo retainer.', meta: 'Looker Studio · Reusable' },
+    p4: { tag: 'CLIENT PORTAL', price: 49, title: 'Client Portal<br>HTML Template', subtitle: 'Drop-in client portal you deploy on Vercel in 10 minutes per client. Dark theme. Mobile responsive. Zero backend.', meta: 'HTML · CSS · Vanilla JS' },
+    p5: { tag: 'SERVICE KIT', price: 44, title: 'FinOps Audit<br>& Savings Kit', subtitle: 'Audit AWS or GCP accounts. Find $15K–$60K/month in waste in five days. Charge $3K–$25K per engagement.', meta: '25-point checklist · 4 prompts' },
+    p6: { tag: 'LANDING PAGE', price: 19, title: 'Relay <span class="accent">—</span> AI Doc <span class="accent">→</span> CRM', subtitle: 'A waitlist-grade landing page for any AI document-extraction product. One file. Drop in your brand. Ship by tonight.', meta: 'Single HTML · No build' },
+    p7: { tag: 'UI KIT · 5 SCREENS', price: 49, title: 'Console Kit<br>AI API Dashboard', subtitle: 'Five hand-tuned screens. Dark + light. Real interactivity. The AI API console template that doesn\'t look like a Tailwind UI clone.', meta: 'Console · Logs · Empty · SignIn · Pricing' },
+    p8: { tag: 'BI DASHBOARD', price: 39, title: 'Meridian<br>Owner\'s Briefing', subtitle: 'Single-screen BI dashboard with editorial taste. The Monday-morning report a CFO actually opens. Warm-paper aesthetic.', meta: 'Single HTML · Prints to PDF' },
+  };
+  const id = params.get('p') || 'p1';
+  const d = data[id];
+  if (d) {
+    document.getElementById('title').innerHTML = d.title;
+    document.getElementById('subtitle').textContent = d.subtitle;
+    document.getElementById('meta').textContent = d.meta;
+    document.getElementById('topRight').innerHTML =
+      '<div style="display:flex;gap:14px;align-items:center;">' +
+      '<span class="tag">' + d.tag + '</span>' +
+      '<span class="price-chip"><span class="currency">$</span><span class="num">' + d.price + '</span></span>' +
+      '</div>';
+    document.title = d.title.replace(/<[^>]+>/g, ' ').trim();
+  }
+</script>
+</body>
+</html>
