@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-page">
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <header class="portal-header">
+    <div class="header-inner">
+      <a href="dashboard.html" class="brand-mark" aria-label="Soul in Motion home">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-name">Soul in Motion</span>
+      </a>
+      <nav class="portal-nav" aria-label="Portal sections">
+        <a href="#status" class="nav-link active" data-section="status">Status</a>
+        <a href="#files" class="nav-link" data-section="files">Files</a>
+        <a href="#messages" class="nav-link" data-section="messages">Messages</a>
+        <a href="#next" class="nav-link" data-section="next">Next Steps</a>
+      </nav>
+      <button id="logoutBtn" class="btn btn-ghost btn-small" type="button">Sign out</button>
+    </div>
+  </header>
+
+  <main class="portal-main">
+
+    <section class="welcome-strip">
+      <p class="eyebrow">Project Workspace</p>
+      <h1 class="welcome-title">Hi <span class="accent" id="clientName">there</span>, here's where things stand.</h1>
+      <p class="welcome-sub">Last updated <span id="lastUpdated">just now</span>. Refresh for the latest.</p>
+    </section>
+
+    <section id="status" class="portal-section">
+      <div class="section-head">
+        <p class="eyebrow">01 · Project Status</p>
+        <h2>Where we are this week</h2>
+      </div>
+
+      <div class="status-grid">
+        <article class="kpi-card">
+          <p class="kpi-label">Phase</p>
+          <p class="kpi-value">Build</p>
+          <p class="kpi-note">2 of 4 phases complete</p>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-label">Overall progress</p>
+          <p class="kpi-value">62%</p>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:62%"></div>
+          </div>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-label">Next milestone</p>
+          <p class="kpi-value-small">Internal QA review</p>
+          <p class="kpi-note">Targeted for next Friday</p>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-label">Open blockers</p>
+          <p class="kpi-value good">0</p>
+          <p class="kpi-note">All clear · proceed at pace</p>
+        </article>
+      </div>
+
+      <div class="phase-list">
+        <div class="phase-row done">
+          <span class="phase-dot"></span>
+          <div class="phase-body">
+            <h3>Discovery</h3>
+            <p>Goals, constraints, success metrics confirmed.</p>
+          </div>
+          <span class="phase-tag">Complete</span>
+        </div>
+        <div class="phase-row done">
+          <span class="phase-dot"></span>
+          <div class="phase-body">
+            <h3>Design &amp; Architecture</h3>
+            <p>System diagrams, UX flows, and stack approved.</p>
+          </div>
+          <span class="phase-tag">Complete</span>
+        </div>
+        <div class="phase-row active">
+          <span class="phase-dot"></span>
+          <div class="phase-body">
+            <h3>Build</h3>
+            <p>Core features in development. Weekly demo videos delivered.</p>
+          </div>
+          <span class="phase-tag">In progress</span>
+        </div>
+        <div class="phase-row pending">
+          <span class="phase-dot"></span>
+          <div class="phase-body">
+            <h3>Launch &amp; Handover</h3>
+            <p>Final QA, training session, and 30-day support window.</p>
+          </div>
+          <span class="phase-tag">Upcoming</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="files" class="portal-section">
+      <div class="section-head">
+        <p class="eyebrow">02 · Recent Files</p>
+        <h2>Latest deliverables</h2>
+      </div>
+
+      <ul class="file-list" id="fileList">
+        <li class="file-row">
+          <span class="file-icon" aria-hidden="true">PDF</span>
+          <div class="file-body">
+            <p class="file-title">Week 5 Build Report</p>
+            <p class="file-meta">2.4 MB · Added today</p>
+          </div>
+          <a href="#" class="file-action" data-action="download">Download</a>
+        </li>
+        <li class="file-row">
+          <span class="file-icon" aria-hidden="true">MP4</span>
+          <div class="file-body">
+            <p class="file-title">Demo · Onboarding Flow</p>
+            <p class="file-meta">128 MB · Added 2 days ago</p>
+          </div>
+          <a href="#" class="file-action" data-action="download">Download</a>
+        </li>
+        <li class="file-row">
+          <span class="file-icon" aria-hidden="true">FIG</span>
+          <div class="file-body">
+            <p class="file-title">UI Components — v3 (Figma link)</p>
+            <p class="file-meta">External · Updated 4 days ago</p>
+          </div>
+          <a href="#" class="file-action" data-action="open">Open</a>
+        </li>
+        <li class="file-row">
+          <span class="file-icon" aria-hidden="true">DOC</span>
+          <div class="file-body">
+            <p class="file-title">Brand Voice &amp; Microcopy Guidelines</p>
+            <p class="file-meta">410 KB · Added last week</p>
+          </div>
+          <a href="#" class="file-action" data-action="download">Download</a>
+        </li>
+        <li class="file-row">
+          <span class="file-icon" aria-hidden="true">ZIP</span>
+          <div class="file-body">
+            <p class="file-title">Image Asset Pack — Hero &amp; Cards</p>
+            <p class="file-meta">86 MB · Added 9 days ago</p>
+          </div>
+          <a href="#" class="file-action" data-action="download">Download</a>
+        </li>
+      </ul>
+    </section>
+
+    <section id="messages" class="portal-section">
+      <div class="section-head">
+        <p class="eyebrow">03 · Messages</p>
+        <h2>Conversation thread</h2>
+      </div>
+
+      <div class="message-list">
+        <article class="message message-them">
+          <div class="message-meta">
+            <span class="message-author">Dev Rajput</span>
+            <span class="message-time">Today · 09:42</span>
+          </div>
+          <p>Quick heads-up — the Week 5 build report is in the Files section. The flow you flagged in the last call is now wired end-to-end. Take a look when you can.</p>
+        </article>
+
+        <article class="message message-you">
+          <div class="message-meta">
+            <span class="message-author">You</span>
+            <span class="message-time">Yesterday · 17:08</span>
+          </div>
+          <p>Loved the demo video. One question on the empty-state copy — can we make it slightly warmer? Will leave a comment in Figma later today.</p>
+        </article>
+
+        <article class="message message-them">
+          <div class="message-meta">
+            <span class="message-author">Dev Rajput</span>
+            <span class="message-time">2 days ago · 11:20</span>
+          </div>
+          <p>New demo video uploaded — onboarding flow is feature-complete. Questions or notes welcome any time.</p>
+        </article>
+      </div>
+
+      <form id="messageForm" class="message-form" autocomplete="off">
+        <label for="messageInput" class="visually-hidden">Send a message</label>
+        <textarea
+          id="messageInput"
+          name="message"
+          placeholder="Type a message…"
+          rows="2"
+        ></textarea>
+        <button type="submit" class="btn btn-primary btn-small">Send</button>
+      </form>
+    </section>
+
+    <section id="next" class="portal-section">
+      <div class="section-head">
+        <p class="eyebrow">04 · Next Steps</p>
+        <h2>What's coming up</h2>
+      </div>
+
+      <ol class="next-list">
+        <li>
+          <span class="next-marker">A</span>
+          <div>
+            <p class="next-title">Review the Week 5 build report</p>
+            <p class="next-sub">Owner: <strong>You</strong> · Due: this Friday</p>
+          </div>
+        </li>
+        <li>
+          <span class="next-marker">B</span>
+          <div>
+            <p class="next-title">Send updated brand assets (logo + palette)</p>
+            <p class="next-sub">Owner: <strong>You</strong> · Due: next Wednesday</p>
+          </div>
+        </li>
+        <li>
+          <span class="next-marker">C</span>
+          <div>
+            <p class="next-title">Internal QA pass on completed flows</p>
+            <p class="next-sub">Owner: <strong>Soul in Motion</strong> · Due: next Friday</p>
+          </div>
+        </li>
+        <li>
+          <span class="next-marker">D</span>
+          <div>
+            <p class="next-title">Schedule launch &amp; handover session</p>
+            <p class="next-sub">Owner: <strong>Both</strong> · Due: 2 weeks out</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+  </main>
+
+  <footer class="portal-footer">
+    <p>Soul in Motion · Built by Dev Rajput · <a href="https://rajputdev77.gumroad.com" target="_blank" rel="noopener">rajputdev77.gumroad.com</a></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

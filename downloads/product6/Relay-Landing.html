@@ -1,0 +1,1208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Relay — Document automation for operators</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0a09;
+    --bg-2: #100e0c;
+    --surface: #15130f;
+    --surface-2: #1b1814;
+    --border: #2a2620;
+    --border-2: #3a342c;
+    --text: #f4efe6;
+    --text-dim: #b8b1a3;
+    --muted: #807a6e;
+    --faint: #4a4640;
+    --amber: #ffa340;
+    --amber-dim: #c97a26;
+    --green: #b8e62f;
+    --red: #ff5c4a;
+    --blue-dim: #5b8ab8;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "Inter Tight", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    background-image:
+      radial-gradient(1200px 600px at 75% -10%, rgba(255,163,64,0.06), transparent 60%),
+      linear-gradient(180deg, #0b0a09 0%, #0b0a09 100%);
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+  ::selection { background: var(--amber); color: #1a1410; }
+
+  /* Layout shell */
+  .shell { max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 720px) { .shell { padding: 0 20px; } }
+
+  /* Grid backdrop */
+  .grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: linear-gradient(180deg, black 0%, black 60%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* ======= NAV ======= */
+  nav.top {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(12px);
+    background: rgba(11,10,9,0.72);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-row { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand .logomark {
+    width: 22px; height: 22px; position: relative;
+  }
+  .brand .logomark::before, .brand .logomark::after {
+    content: ""; position: absolute; background: var(--text);
+  }
+  .brand .logomark::before { left: 0; top: 4px; width: 22px; height: 2px; }
+  .brand .logomark::after { left: 4px; top: 14px; width: 14px; height: 2px; background: var(--amber); }
+  .brand .logomark span {
+    position: absolute; right: -2px; top: -2px; width: 6px; height: 6px;
+    background: var(--amber); box-shadow: 0 0 10px var(--amber);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  .brand-name { font-size: 17px; }
+  .nav-links { display: flex; gap: 28px; font-size: 14px; color: var(--text-dim); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 4px; font-size: 14px; font-weight: 500;
+    border: 1px solid transparent; transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn-ghost { color: var(--text-dim); border-color: var(--border); background: transparent; }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border-2); }
+  .btn-primary {
+    background: var(--amber); color: #1a1410; border-color: var(--amber);
+    box-shadow: 0 0 0 1px rgba(255,163,64,0.4), 0 8px 24px -8px rgba(255,163,64,0.45);
+  }
+  .btn-primary:hover { background: #ffb866; box-shadow: 0 0 0 1px rgba(255,163,64,0.6), 0 12px 32px -8px rgba(255,163,64,0.6); }
+  .btn-lg { padding: 12px 20px; font-size: 15px; }
+  @media (max-width: 880px) { .nav-links { display: none; } }
+
+  /* ======= HERO ======= */
+  .hero { position: relative; padding: 96px 0 48px; overflow: hidden; }
+  .hero-inner { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr); gap: 64px; align-items: center; position: relative; }
+  @media (max-width: 1080px) { .hero-inner { grid-template-columns: 1fr; gap: 48px; } }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 5px 12px 5px 8px; border: 1px solid var(--border); border-radius: 100px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text-dim); background: var(--surface);
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.6s ease-in-out infinite; }
+
+  h1.hero-h {
+    font-size: clamp(40px, 5.4vw, 68px); line-height: 0.98; letter-spacing: -0.035em;
+    font-weight: 600; margin: 22px 0 22px;
+    text-wrap: balance;
+  }
+  h1.hero-h .accent { color: var(--amber); }
+  h1.hero-h .strike { text-decoration: line-through; text-decoration-color: var(--faint); text-decoration-thickness: 2px; color: var(--muted); }
+
+  .hero-sub { font-size: 18px; line-height: 1.55; color: var(--text-dim); max-width: 520px; text-wrap: pretty; }
+  .hero-cta-row { display: flex; gap: 12px; margin-top: 32px; align-items: center; flex-wrap: wrap; }
+  .hero-meta { display: flex; gap: 24px; margin-top: 44px; padding-top: 24px; border-top: 1px dashed var(--border); }
+  .hero-meta .stat { display: flex; flex-direction: column; gap: 4px; }
+  .hero-meta .stat .v { font-family: var(--mono); font-size: 20px; color: var(--text); font-weight: 500; letter-spacing: -0.01em; }
+  .hero-meta .stat .v .unit { color: var(--amber); font-size: 14px; margin-left: 2px; }
+  .hero-meta .stat .l { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+  /* ======= PIPELINE WIDGET ======= */
+  .pipeline {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,163,64,0.04);
+  }
+  .pipe-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  }
+  .pipe-header .left { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+  .pipe-header .traffic { display: flex; gap: 6px; }
+  .pipe-header .traffic span { width: 9px; height: 9px; border-radius: 50%; }
+  .pipe-header .traffic span:nth-child(1) { background: #3a342c; }
+  .pipe-header .traffic span:nth-child(2) { background: #3a342c; }
+  .pipe-header .traffic span:nth-child(3) { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .pipe-header .right { font-family: var(--mono); font-size: 11px; color: var(--muted); display: flex; gap: 16px; }
+  .pipe-header .right .live { color: var(--green); display: flex; align-items: center; gap: 6px; }
+  .pipe-header .right .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.6s ease-in-out infinite; }
+
+  .pipe-canvas { position: relative; padding: 36px 28px 28px; min-height: 380px; }
+  .pipe-canvas::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+  .pipe-row {
+    display: grid; grid-template-columns: 1fr 60px 1fr 60px 1fr; align-items: center;
+    gap: 0; position: relative; z-index: 1;
+  }
+  .node {
+    background: var(--bg-2);
+    border: 1px solid var(--border-2);
+    border-radius: 4px;
+    padding: 14px;
+    position: relative;
+    min-height: 132px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .node.processing { border-color: rgba(255,163,64,0.45); box-shadow: inset 0 0 0 1px rgba(255,163,64,0.08), 0 0 24px -8px rgba(255,163,64,0.35); }
+  .node-head { display: flex; align-items: center; justify-content: space-between; }
+  .node-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .node-title { font-size: 13px; font-weight: 500; color: var(--text); margin-top: 6px; }
+  .node-body { margin-top: 10px; }
+  .doc-line {
+    height: 4px; background: rgba(255,255,255,0.06); border-radius: 1px; margin-bottom: 4px; position: relative; overflow: hidden;
+  }
+  .doc-line.w1 { width: 100%; }
+  .doc-line.w2 { width: 78%; }
+  .doc-line.w3 { width: 92%; }
+  .doc-line.w4 { width: 64%; }
+  .doc-line.w5 { width: 88%; }
+  .doc-line.highlight::after {
+    content: ""; position: absolute; top: 0; left: -40%; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+    animation: scan 2.4s linear infinite;
+  }
+  @keyframes scan { 0% { left: -40%; } 100% { left: 110%; } }
+
+  .ai-core {
+    position: relative; height: 60px; display: flex; align-items: center; justify-content: center; margin: 8px 0 4px;
+  }
+  .ai-rings { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .ai-rings .ring {
+    position: absolute; border-radius: 50%; border: 1px solid var(--amber);
+    opacity: 0; animation: ring-pulse 2.4s ease-out infinite;
+  }
+  .ai-rings .ring:nth-child(1) { width: 22px; height: 22px; animation-delay: 0s; }
+  .ai-rings .ring:nth-child(2) { width: 22px; height: 22px; animation-delay: 0.8s; }
+  .ai-rings .ring:nth-child(3) { width: 22px; height: 22px; animation-delay: 1.6s; }
+  @keyframes ring-pulse {
+    0% { transform: scale(1); opacity: 0.9; border-color: var(--amber); }
+    100% { transform: scale(2.6); opacity: 0; border-color: var(--amber); }
+  }
+  .ai-core .core-dot {
+    width: 14px; height: 14px; border-radius: 50%; background: var(--amber);
+    box-shadow: 0 0 14px var(--amber), 0 0 28px rgba(255,163,64,0.5);
+    position: relative; z-index: 1;
+  }
+
+  .field-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+  .field-row:last-child { border-bottom: none; }
+  .field-row .k { color: var(--muted); }
+  .field-row .v { color: var(--text); }
+  .field-row .v.ok { color: var(--green); }
+
+  /* connectors */
+  .connector {
+    height: 100%; position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .connector .line {
+    width: 100%; height: 1px; background: linear-gradient(90deg, var(--border-2), var(--amber-dim), var(--border-2));
+    position: relative;
+  }
+  .connector .arrow {
+    position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0; border-left: 6px solid var(--amber-dim); border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+  }
+  .packet {
+    position: absolute; top: 50%; left: 0; transform: translate(-50%, -50%);
+    width: 8px; height: 8px; background: var(--amber); border-radius: 1px;
+    box-shadow: 0 0 8px var(--amber);
+    animation: travel 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .packet.p2 { animation-delay: 1.2s; background: var(--green); box-shadow: 0 0 8px var(--green); }
+  @keyframes travel {
+    0% { left: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+
+  .pipe-footer {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+    border-top: 1px solid var(--border);
+    background: var(--bg-2);
+  }
+  .pipe-footer .cell { padding: 14px 18px; border-right: 1px solid var(--border); }
+  .pipe-footer .cell:last-child { border-right: none; }
+  .pipe-footer .k { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .pipe-footer .v { font-family: var(--mono); font-size: 16px; color: var(--text); font-weight: 500; }
+  .pipe-footer .v .delta { color: var(--green); font-size: 12px; margin-left: 6px; }
+
+  @media (max-width: 720px) {
+    .pipe-row { grid-template-columns: 1fr; gap: 12px; }
+    .connector { height: 32px; transform: rotate(90deg); width: 32px; margin: 0 auto; }
+    .pipe-footer { grid-template-columns: 1fr; }
+    .pipe-footer .cell { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  /* ======= LOGOS ======= */
+  .logos { padding: 64px 0 32px; border-bottom: 1px solid var(--border); }
+  .logos-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 28px; }
+  .logos-row {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 0;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .logos-row .item {
+    padding: 28px 16px; border-right: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 13px; color: var(--text-dim);
+    letter-spacing: -0.01em;
+  }
+  .logos-row .item:last-child { border-right: none; }
+  .logos-row .item .mark { width: 14px; height: 14px; border: 1.5px solid var(--text-dim); margin-right: 8px; }
+  .logos-row .item.diamond .mark { transform: rotate(45deg); }
+  .logos-row .item.circle .mark { border-radius: 50%; }
+  .logos-row .item.bar .mark { width: 14px; height: 4px; background: var(--text-dim); border: none; }
+  .logos-row .item.split .mark { background: linear-gradient(90deg, var(--text-dim) 50%, transparent 50%); border: 1.5px solid var(--text-dim); }
+  @media (max-width: 880px) { .logos-row { grid-template-columns: repeat(3, 1fr); } .logos-row .item:nth-child(3) { border-right: none; } .logos-row .item:nth-child(-n+3) { border-bottom: 1px solid var(--border); } }
+
+  /* ======= FEATURES ======= */
+  section.features { padding: 120px 0 80px; }
+  .section-head { margin-bottom: 56px; max-width: 720px; }
+  .section-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; }
+  .section-title { font-size: clamp(32px, 4vw, 48px); letter-spacing: -0.03em; line-height: 1.04; font-weight: 600; margin: 0 0 16px; }
+  .section-sub { font-size: 17px; line-height: 1.55; color: var(--text-dim); max-width: 560px; }
+
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); }
+  @media (max-width: 980px) { .feat-grid { grid-template-columns: 1fr; } }
+  .feat {
+    padding: 36px 32px; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    min-height: 460px;
+    position: relative;
+    background: var(--surface);
+    transition: background 0.2s ease;
+  }
+  .feat:hover { background: var(--surface-2); }
+  .feat:last-child { border-right: none; }
+  @media (max-width: 980px) {
+    .feat { border-right: none; border-bottom: 1px solid var(--border); }
+    .feat:last-child { border-bottom: none; }
+  }
+  .feat .num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--muted); }
+  .feat .title { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; margin-top: 8px; }
+  .feat .desc { font-size: 15px; line-height: 1.55; color: var(--text-dim); margin-top: 12px; }
+  .feat .visual { margin-top: auto; padding-top: 28px; }
+
+  /* feat 1: extraction */
+  .extract-card { font-family: var(--mono); font-size: 11px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .extract-card .row { display: flex; padding: 8px 12px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; }
+  .extract-card .row:last-child { border-bottom: none; }
+  .extract-card .row .k { color: var(--muted); }
+  .extract-card .row .v { color: var(--text); }
+  .extract-card .row .conf { color: var(--green); font-size: 10px; }
+  .extract-card .row.head { background: rgba(255,255,255,0.02); color: var(--muted); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* feat 2: routing */
+  .route { font-family: var(--mono); font-size: 11px; }
+  .route .step { display: flex; align-items: center; gap: 10px; padding: 8px 0; color: var(--text-dim); }
+  .route .step .marker { width: 8px; height: 8px; border: 1px solid var(--border-2); border-radius: 50%; flex: 0 0 auto; }
+  .route .step.done .marker { background: var(--green); border-color: var(--green); box-shadow: 0 0 6px var(--green); }
+  .route .step.active .marker { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse 1.4s ease-in-out infinite; }
+  .route .step .label { flex: 1; }
+  .route .step .time { color: var(--muted); font-size: 10px; }
+  .route .conn { width: 1px; height: 12px; background: var(--border-2); margin-left: 4px; }
+
+  /* feat 3: integrations */
+  .integrations { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .int-tile {
+    aspect-ratio: 1; border: 1px solid var(--border); background: var(--bg-2); border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    position: relative;
+  }
+  .int-tile.ok::after { content: ""; position: absolute; top: 6px; right: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 4px var(--green); }
+  .int-tile.warn::after { content: ""; position: absolute; top: 6px; right: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); }
+
+  /* ======= USE CASES ======= */
+  section.usecases { padding: 80px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--bg-2); }
+  .uc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 880px) { .uc-grid { grid-template-columns: 1fr; } }
+  .uc {
+    border: 1px solid var(--border); background: var(--surface);
+    padding: 32px;
+    position: relative;
+  }
+  .uc .uc-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amber); }
+  .uc h3 { font-size: 26px; letter-spacing: -0.02em; font-weight: 600; margin: 12px 0 12px; }
+  .uc p { font-size: 15px; line-height: 1.55; color: var(--text-dim); margin: 0; }
+  .uc .docs {
+    margin-top: 24px; display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .uc .doc-pill {
+    font-family: var(--mono); font-size: 11px;
+    padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 100px;
+    color: var(--text-dim); background: var(--bg-2);
+  }
+
+  /* ======= QUOTE STRIP ======= */
+  section.quote { padding: 96px 0; border-top: 1px solid var(--border); }
+  .quote-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 64px; align-items: center; }
+  @media (max-width: 980px) { .quote-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .quote-mark { font-family: var(--mono); color: var(--amber); font-size: 48px; line-height: 0.6; margin-bottom: 12px; }
+  blockquote.q { margin: 0; font-size: clamp(22px, 2.4vw, 30px); line-height: 1.3; letter-spacing: -0.018em; color: var(--text); text-wrap: pretty; font-weight: 500; }
+  blockquote.q em { color: var(--amber); font-style: normal; }
+  .q-attr { display: flex; align-items: center; gap: 16px; margin-top: 28px; }
+  .q-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #3a342c, #1b1814); border: 1px solid var(--border-2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 14px; color: var(--text-dim); flex: 0 0 auto; }
+  .q-attr .who { font-size: 14px; color: var(--text); font-weight: 500; }
+  .q-attr .role { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .q-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); }
+  .q-metrics .m { padding: 28px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .q-metrics .m:nth-child(2n) { border-right: none; }
+  .q-metrics .m:nth-last-child(-n+2) { border-bottom: none; }
+  .q-metrics .m .big { font-size: 36px; letter-spacing: -0.03em; font-weight: 500; line-height: 1; }
+  .q-metrics .m .big .u { color: var(--amber); font-size: 22px; margin-left: 2px; }
+  .q-metrics .m .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+  .q-metrics .m .delta { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 11px; color: var(--green); margin-top: 6px; }
+
+  /* ======= ROI CALCULATOR ======= */
+  section.roi { padding: 96px 0; background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .roi-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 56px; align-items: stretch; }
+  @media (max-width: 980px) { .roi-grid { grid-template-columns: 1fr; gap: 32px; } }
+  .roi-controls { background: var(--surface); border: 1px solid var(--border); padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+  .roi-row .roi-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .roi-row .roi-label .k { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .roi-row .roi-label .v { font-family: var(--mono); font-size: 14px; color: var(--text); }
+  .roi-row .roi-label .v .u { color: var(--muted); margin-left: 4px; }
+  .roi-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 2px; background: var(--border-2); outline: none; cursor: pointer; }
+  .roi-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 4px rgba(255,163,64,0.15); cursor: grab; }
+  .roi-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--amber); border: none; box-shadow: 0 0 0 4px rgba(255,163,64,0.15); cursor: grab; }
+  .roi-ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--faint); margin-top: 6px; }
+  .roi-output {
+    background: var(--surface); border: 1px solid var(--border); padding: 0;
+    display: flex; flex-direction: column; position: relative; overflow: hidden;
+  }
+  .roi-output::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+  }
+  .roi-out-head { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--text-dim); position: relative; }
+  .roi-out-head .live { color: var(--green); display: flex; align-items: center; gap: 6px; }
+  .roi-out-head .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.6s ease-in-out infinite; }
+  .roi-big { padding: 36px 24px 24px; position: relative; }
+  .roi-big .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .roi-big .num { font-size: clamp(56px, 7vw, 88px); letter-spacing: -0.04em; font-weight: 500; line-height: 1; margin-top: 8px; color: var(--text); }
+  .roi-big .num .cur { color: var(--muted); font-size: 0.55em; margin-right: 4px; vertical-align: 0.15em; }
+  .roi-big .sub { font-family: var(--mono); font-size: 12px; color: var(--text-dim); margin-top: 10px; }
+  .roi-big .sub .amber { color: var(--amber); }
+  .roi-breakdown { border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr 1fr; position: relative; }
+  .roi-breakdown .cell { padding: 18px 20px; border-right: 1px solid var(--border); }
+  .roi-breakdown .cell:last-child { border-right: none; }
+  .roi-breakdown .cell .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .roi-breakdown .cell .v { font-family: var(--mono); font-size: 16px; color: var(--text); margin-top: 6px; font-weight: 500; }
+  .roi-breakdown .cell .v.green { color: var(--green); }
+
+  /* ======= PRICING ======= */
+  section.pricing { padding: 120px 0 80px; }
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); }
+  @media (max-width: 880px) { .pricing-grid { grid-template-columns: 1fr; } }
+  .tier {
+    padding: 40px 36px; border-right: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .tier:last-child { border-right: none; }
+  @media (max-width: 880px) {
+    .tier { border-right: none; border-bottom: 1px solid var(--border); }
+    .tier:last-child { border-bottom: none; }
+  }
+  .tier.featured { background: var(--surface-2); }
+  .tier.featured::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--amber);
+    box-shadow: 0 0 12px var(--amber);
+  }
+  .tier .tier-label { display: flex; align-items: center; justify-content: space-between; }
+  .tier .tier-name { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .tier.featured .tier-name { color: var(--amber); }
+  .tier .tier-badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amber); border: 1px solid var(--amber); padding: 3px 8px; border-radius: 2px; }
+  .tier h2 { font-size: 32px; letter-spacing: -0.025em; font-weight: 600; margin: 16px 0 8px; }
+  .tier .blurb { font-size: 14px; color: var(--text-dim); line-height: 1.5; margin: 0 0 24px; }
+  .tier .price-row { display: flex; align-items: baseline; gap: 8px; padding: 20px 0; border-top: 1px dashed var(--border-2); border-bottom: 1px dashed var(--border-2); margin-bottom: 24px; }
+  .tier .price { font-size: 56px; letter-spacing: -0.04em; font-weight: 500; font-family: var(--sans); line-height: 1; }
+  .tier .price .cur { color: var(--muted); font-size: 28px; margin-right: 2px; vertical-align: top; }
+  .tier .per { color: var(--muted); font-family: var(--mono); font-size: 13px; }
+  .tier ul { list-style: none; padding: 0; margin: 0 0 32px; display: flex; flex-direction: column; gap: 12px; }
+  .tier li { font-size: 14px; color: var(--text-dim); display: flex; gap: 12px; align-items: flex-start; line-height: 1.4; }
+  .tier li::before {
+    content: ""; flex: 0 0 auto; width: 14px; height: 14px; margin-top: 2px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23ffa340' stroke-width='1.6'><path d='M2 7l3 3 7-7'/></svg>");
+    background-repeat: no-repeat; background-position: center;
+  }
+  .tier li strong { color: var(--text); font-weight: 500; }
+  .tier li .mono { font-family: var(--mono); font-size: 12px; color: var(--text); }
+  .tier .cta { margin-top: auto; }
+  .tier .cta .btn { width: 100%; justify-content: center; padding: 14px 20px; }
+  .tier .fine { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center; }
+
+  /* ======= FAQ ======= */
+  section.faq { padding: 96px 0 32px; }
+  .faq-grid { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); gap: 64px; }
+  @media (max-width: 980px) { .faq-grid { grid-template-columns: 1fr; gap: 32px; } }
+  .faq-list { border-top: 1px solid var(--border); }
+  details.faq-item { border-bottom: 1px solid var(--border); padding: 22px 0; }
+  details.faq-item summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 24px; font-size: 17px; letter-spacing: -0.01em; color: var(--text); font-weight: 500; }
+  details.faq-item summary::-webkit-details-marker { display: none; }
+  details.faq-item summary .icon { width: 18px; height: 18px; position: relative; flex: 0 0 auto; }
+  details.faq-item summary .icon::before, details.faq-item summary .icon::after { content: ""; position: absolute; background: var(--amber); transition: transform 0.2s ease; }
+  details.faq-item summary .icon::before { left: 0; top: 8px; width: 18px; height: 2px; }
+  details.faq-item summary .icon::after { left: 8px; top: 0; width: 2px; height: 18px; }
+  details.faq-item[open] summary .icon::after { transform: scaleY(0); }
+  details.faq-item .a { color: var(--text-dim); font-size: 15px; line-height: 1.6; margin-top: 14px; max-width: 640px; text-wrap: pretty; }
+  details.faq-item .a .mono { font-family: var(--mono); font-size: 13px; color: var(--text); }
+
+  /* ======= WAITLIST ======= */
+  section.waitlist { padding: 80px 0 120px; position: relative; }
+  .waitlist-card {
+    border: 1px solid var(--border); background: var(--surface);
+    padding: 56px 48px; border-radius: 6px; position: relative; overflow: hidden;
+    background-image:
+      radial-gradient(600px 200px at 100% 0%, rgba(255,163,64,0.08), transparent 70%),
+      linear-gradient(180deg, var(--surface), var(--surface));
+  }
+  .waitlist-card::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
+  .waitlist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; position: relative; }
+  @media (max-width: 880px) { .waitlist-grid { grid-template-columns: 1fr; gap: 32px; } .waitlist-card { padding: 36px 28px; } }
+  .waitlist-h { font-size: clamp(28px, 3.4vw, 40px); letter-spacing: -0.025em; line-height: 1.05; font-weight: 600; margin: 12px 0 16px; }
+  .waitlist-sub { color: var(--text-dim); font-size: 16px; line-height: 1.55; margin: 0 0 0; max-width: 460px; }
+  .waitlist-form { display: flex; flex-direction: column; gap: 12px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .input-wrap { position: relative; }
+  .input-wrap label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+  input[type="email"], input[type="text"], select {
+    width: 100%;
+    background: var(--bg-2); border: 1px solid var(--border-2);
+    color: var(--text); padding: 12px 14px; border-radius: 3px;
+    font-family: var(--sans); font-size: 14px;
+    outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:focus, select:focus { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
+  input::placeholder { color: var(--faint); }
+  select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%23807a6e'><path d='M2 4l4 4 4-4z'/></svg>"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .waitlist-form .btn { width: 100%; justify-content: center; padding: 14px 20px; margin-top: 4px; }
+  .submitted {
+    display: flex; align-items: center; gap: 14px; padding: 18px 20px; border: 1px solid var(--green);
+    background: rgba(184, 230, 47, 0.06); border-radius: 3px; color: var(--text);
+    font-size: 14px;
+  }
+  .submitted .check {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--green); color: #1a1410;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex: 0 0 auto;
+  }
+  .submitted .pos { font-family: var(--mono); font-size: 12px; color: var(--green); margin-left: auto; }
+  .form-tos { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 6px; text-align: center; }
+
+  /* ======= FOOTER ======= */
+  footer { border-top: 1px solid var(--border); padding: 48px 0 32px; background: var(--bg); }
+  .foot-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
+  .foot-left { max-width: 320px; }
+  .foot-left p { font-size: 13px; color: var(--text-dim); line-height: 1.55; margin: 12px 0 0; }
+  .foot-cols { display: flex; gap: 56px; }
+  .foot-col { display: flex; flex-direction: column; gap: 10px; }
+  .foot-col .h { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .foot-col a { font-size: 13px; color: var(--text-dim); }
+  .foot-col a:hover { color: var(--text); }
+  .foot-bottom { margin-top: 48px; padding-top: 20px; border-top: 1px dashed var(--border); display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); flex-wrap: wrap; gap: 12px; }
+
+  /* utility */
+  .reveal { opacity: 0; transform: translateY(8px); animation: reveal 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; }
+  .reveal.d1 { animation-delay: 0.05s; }
+  .reveal.d2 { animation-delay: 0.15s; }
+  .reveal.d3 { animation-delay: 0.25s; }
+  .reveal.d4 { animation-delay: 0.35s; }
+  @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top">
+  <div class="shell nav-row">
+    <a class="brand" href="#">
+      <span class="logomark"><span></span></span>
+      <span class="brand-name">Relay</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Platform</a>
+      <a href="#usecases">Industries</a>
+      <a href="#roi">ROI</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-right">
+      <a href="#signin" class="btn btn-ghost">Sign in</a>
+      <a href="#waitlist" class="btn btn-primary">Join waitlist</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="grid-bg"></div>
+  <div class="shell hero-inner">
+    <div class="hero-left">
+      <span class="eyebrow reveal d1"><span class="dot"></span>v1.2 · Now ingesting BOLs, contracts, MLS sheets</span>
+      <h1 class="hero-h reveal d2">
+        Stop <span class="strike">retyping</span> documents into your CRM.
+        <br/><span class="accent">Relay does it for you.</span>
+      </h1>
+      <p class="hero-sub reveal d3">
+        An AI pipeline that reads any document — listing agreements, bills of lading, purchase orders, rate confirmations — and writes clean, structured records straight into the tools your team already uses.
+      </p>
+      <div class="hero-cta-row reveal d3">
+        <a href="#waitlist" class="btn btn-primary btn-lg">Join the waitlist →</a>
+        <a href="#features" class="btn btn-ghost btn-lg">See it run</a>
+      </div>
+      <div class="hero-meta reveal d4">
+        <div class="stat"><div class="v">14<span class="unit">s</span></div><div class="l">Avg doc → CRM</div></div>
+        <div class="stat"><div class="v">99.2<span class="unit">%</span></div><div class="l">Field accuracy</div></div>
+        <div class="stat"><div class="v">340<span class="unit">+</span></div><div class="l">Document templates</div></div>
+      </div>
+    </div>
+
+    <!-- PIPELINE WIDGET -->
+    <div class="pipeline reveal d2" id="pipeline">
+      <div class="pipe-header">
+        <div class="left">
+          <div class="traffic"><span></span><span></span><span></span></div>
+          <span>workflow / inbound-docs.yaml</span>
+        </div>
+        <div class="right">
+          <span class="live">live</span>
+          <span id="run-id">run #A4F2-1188</span>
+        </div>
+      </div>
+
+      <div class="pipe-canvas">
+        <div class="pipe-row">
+          <!-- DOCUMENT NODE -->
+          <div class="node">
+            <div>
+              <div class="node-head">
+                <span class="node-tag">01 · Source</span>
+                <span class="node-tag">PDF</span>
+              </div>
+              <div class="node-title" id="doc-title">Rate_Confirmation_8821.pdf</div>
+            </div>
+            <div class="node-body">
+              <div class="doc-line w1 highlight"></div>
+              <div class="doc-line w2"></div>
+              <div class="doc-line w3 highlight"></div>
+              <div class="doc-line w4"></div>
+              <div class="doc-line w5 highlight"></div>
+              <div class="doc-line w2"></div>
+            </div>
+          </div>
+
+          <!-- CONNECTOR 1 -->
+          <div class="connector"><div class="line"><div class="arrow"></div><div class="packet"></div><div class="packet p2"></div></div></div>
+
+          <!-- AI NODE -->
+          <div class="node processing">
+            <div>
+              <div class="node-head">
+                <span class="node-tag" style="color: var(--amber);">02 · Relay AI</span>
+                <span class="node-tag">vision + llm</span>
+              </div>
+              <div class="node-title">Extract & validate</div>
+            </div>
+            <div class="ai-core">
+              <div class="ai-rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+              <div class="core-dot"></div>
+            </div>
+            <div class="node-body" style="font-family: var(--mono); font-size: 10px; color: var(--muted); display: flex; justify-content: space-between;">
+              <span>↳ 7 fields</span>
+              <span id="proc-time">2.4s</span>
+            </div>
+          </div>
+
+          <!-- CONNECTOR 2 -->
+          <div class="connector"><div class="line"><div class="arrow"></div><div class="packet"></div><div class="packet p2"></div></div></div>
+
+          <!-- CRM NODE -->
+          <div class="node">
+            <div>
+              <div class="node-head">
+                <span class="node-tag">03 · Destination</span>
+                <span class="node-tag" style="color: var(--green);">●  synced</span>
+              </div>
+              <div class="node-title">HubSpot · Deals</div>
+            </div>
+            <div class="node-body">
+              <div class="field-row"><span class="k">load_id</span><span class="v" id="f-load">L-8821</span></div>
+              <div class="field-row"><span class="k">origin</span><span class="v" id="f-origin">Dallas, TX</span></div>
+              <div class="field-row"><span class="k">rate</span><span class="v" id="f-rate">$2,840</span></div>
+              <div class="field-row"><span class="k">status</span><span class="v ok">✓ written</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-footer">
+        <div class="cell"><div class="k">Today</div><div class="v" id="m-today">1,284 <span class="delta">▲ 12%</span></div></div>
+        <div class="cell"><div class="k">Avg latency</div><div class="v">11.8s</div></div>
+        <div class="cell"><div class="k">Queue</div><div class="v" id="m-queue">3 docs</div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- LOGOS -->
+<section class="logos">
+  <div class="shell">
+    <div class="logos-label">Connecting documents to the tools you already run on</div>
+    <div class="logos-row">
+      <div class="item"><span class="mark"></span>HubSpot</div>
+      <div class="item diamond"><span class="mark"></span>Salesforce</div>
+      <div class="item circle"><span class="mark"></span>Follow Up Boss</div>
+      <div class="item bar"><span class="mark"></span>McLeod TMS</div>
+      <div class="item split"><span class="mark"></span>Pipedrive</div>
+      <div class="item"><span class="mark" style="border-radius: 2px;"></span>NetSuite</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-eyebrow">— Platform</div>
+      <h2 class="section-title">Three primitives. Every document workflow.</h2>
+      <p class="section-sub">Relay is a small, focused stack. We don't sell modules — we sell throughput. Drop a document in, get a structured record out, in seconds.</p>
+    </div>
+
+    <div class="feat-grid">
+      <!-- FEAT 1 -->
+      <div class="feat">
+        <div class="num">01 / Extraction</div>
+        <div class="title">Read anything. Even the bad scans.</div>
+        <p class="desc">Vision-first extraction trained on the documents your industry actually runs on. Handwritten amendments, faxed BOLs, signed riders — fields come out clean with confidence scores you can route on.</p>
+        <div class="visual">
+          <div class="extract-card">
+            <div class="row head"><span>field</span><span>value</span></div>
+            <div class="row"><span class="k">carrier_mc</span><span class="v">MC-784901 <span class="conf">99%</span></span></div>
+            <div class="row"><span class="k">pickup_date</span><span class="v">2026-05-18 <span class="conf">98%</span></span></div>
+            <div class="row"><span class="k">commodity</span><span class="v">Frozen poultry <span class="conf">94%</span></span></div>
+            <div class="row"><span class="k">total_rate</span><span class="v">$2,840.00 <span class="conf">99%</span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEAT 2 -->
+      <div class="feat">
+        <div class="num">02 / Routing</div>
+        <div class="title">Branchable workflows, no engineer required.</div>
+        <p class="desc">Build pipelines like flowcharts. Validate, enrich, dedupe, then write to the right destination based on rules a dispatcher or office manager can author and audit.</p>
+        <div class="visual">
+          <div class="route">
+            <div class="step done"><span class="marker"></span><span class="label">Ingest from inbox@</span><span class="time">0.4s</span></div>
+            <div class="conn"></div>
+            <div class="step done"><span class="marker"></span><span class="label">Classify · "rate confirmation"</span><span class="time">1.1s</span></div>
+            <div class="conn"></div>
+            <div class="step done"><span class="marker"></span><span class="label">Extract 7 fields</span><span class="time">2.4s</span></div>
+            <div class="conn"></div>
+            <div class="step active"><span class="marker"></span><span class="label">Validate against load board</span><span class="time">…</span></div>
+            <div class="conn"></div>
+            <div class="step"><span class="marker"></span><span class="label">Write to McLeod TMS</span><span class="time">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEAT 3 -->
+      <div class="feat">
+        <div class="num">03 / Sync</div>
+        <div class="title">Lands in the system of record. Always.</div>
+        <p class="desc">Native, bidirectional connectors with the CRMs and TMS your team lives in. Two-way sync, conflict resolution, and a full audit log of every field write — so nothing falls into a spreadsheet graveyard.</p>
+        <div class="visual">
+          <div class="integrations">
+            <div class="int-tile ok">HubSpot</div>
+            <div class="int-tile ok">SF</div>
+            <div class="int-tile ok">FUB</div>
+            <div class="int-tile ok">McLeod</div>
+            <div class="int-tile ok">Pipedrv</div>
+            <div class="int-tile warn">NetSuite</div>
+            <div class="int-tile ok">Zapier</div>
+            <div class="int-tile" style="color: var(--muted);">+ API</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE STRIP -->
+<section class="quote">
+  <div class="shell">
+    <div class="quote-grid">
+      <div>
+        <div class="quote-mark">"</div>
+        <blockquote class="q">
+          We were paying two coordinators just to retype rate confs into McLeod. Relay handled the first <em>1,200 documents in a week</em> with no babysitting — the team thought we'd hired a third person.
+        </blockquote>
+        <div class="q-attr">
+          <div class="q-avatar">MK</div>
+          <div>
+            <div class="who">Marcus Klein</div>
+            <div class="role">Director of Ops · Westgate Freight, 3PL · 38 trucks</div>
+          </div>
+        </div>
+      </div>
+      <div class="q-metrics">
+        <div class="m">
+          <div class="big">18<span class="u">hrs</span></div>
+          <div class="lbl">Saved per week</div>
+          <div class="delta">▲ vs. manual entry</div>
+        </div>
+        <div class="m">
+          <div class="big">99.4<span class="u">%</span></div>
+          <div class="lbl">Field accuracy</div>
+          <div class="delta">▲ 2.1 vs. baseline</div>
+        </div>
+        <div class="m">
+          <div class="big">3.2<span class="u">×</span></div>
+          <div class="lbl">Load throughput</div>
+          <div class="delta">▲ same headcount</div>
+        </div>
+        <div class="m">
+          <div class="big">$47<span class="u">k</span></div>
+          <div class="lbl">Annual run-rate save</div>
+          <div class="delta">▲ on 2,000 docs/mo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="usecases" id="usecases">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-eyebrow">— Built for</div>
+      <h2 class="section-title">Two industries. Mountains of paperwork.</h2>
+    </div>
+    <div class="uc-grid">
+      <div class="uc">
+        <div class="uc-tag">Real estate agencies</div>
+        <h3>From signed listing to MLS-ready in under a minute.</h3>
+        <p>Agents don't get into real estate to type addresses into Follow Up Boss. Relay reads every signed document the moment it lands and pushes the deal forward — so your transaction coordinator becomes a multiplier, not a bottleneck.</p>
+        <div class="docs">
+          <span class="doc-pill">Listing agreements</span>
+          <span class="doc-pill">Purchase contracts</span>
+          <span class="doc-pill">Disclosures</span>
+          <span class="doc-pill">MLS data sheets</span>
+          <span class="doc-pill">Lease riders</span>
+        </div>
+      </div>
+      <div class="uc">
+        <div class="uc-tag">Logistics SMBs</div>
+        <h3>Rate confs and BOLs into your TMS while the truck is still rolling.</h3>
+        <p>Brokers and 3PLs lose hours a day to documents bouncing between email, drivers, and dispatchers. Relay turns that traffic into clean load records — and flags exceptions before they become claims.</p>
+        <div class="docs">
+          <span class="doc-pill">Rate confirmations</span>
+          <span class="doc-pill">Bills of lading</span>
+          <span class="doc-pill">Proof of delivery</span>
+          <span class="doc-pill">Carrier packets</span>
+          <span class="doc-pill">Invoices</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI CALCULATOR -->
+<section class="roi" id="roi">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-eyebrow">— Run the math</div>
+      <h2 class="section-title">What's a slow document costing you?</h2>
+      <p class="section-sub">Tune the sliders to your operation. We'll show you what Relay pays back, monthly, in saved hours and headcount.</p>
+    </div>
+
+    <div class="roi-grid">
+      <div class="roi-controls">
+        <div class="roi-row">
+          <div class="roi-label"><span class="k">Documents / month</span><span class="v"><span id="roi-docs-v">1,200</span></span></div>
+          <input type="range" class="roi-slider" id="roi-docs" min="100" max="6000" step="50" value="1200" />
+          <div class="roi-ticks"><span>100</span><span>1.5k</span><span>3k</span><span>4.5k</span><span>6k</span></div>
+        </div>
+        <div class="roi-row">
+          <div class="roi-label"><span class="k">Minutes per doc, today</span><span class="v"><span id="roi-min-v">8</span><span class="u">min</span></span></div>
+          <input type="range" class="roi-slider" id="roi-min" min="2" max="20" step="1" value="8" />
+          <div class="roi-ticks"><span>2</span><span>6</span><span>10</span><span>14</span><span>20</span></div>
+        </div>
+        <div class="roi-row">
+          <div class="roi-label"><span class="k">Loaded hourly cost</span><span class="v"><span class="u">$</span><span id="roi-rate-v">38</span><span class="u">/hr</span></span></div>
+          <input type="range" class="roi-slider" id="roi-rate" min="20" max="80" step="1" value="38" />
+          <div class="roi-ticks"><span>$20</span><span>$35</span><span>$50</span><span>$65</span><span>$80</span></div>
+        </div>
+        <div style="border-top: 1px dashed var(--border-2); padding-top: 16px; font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.5;">
+          Defaults reflect a typical 3-person ops desk handling rate confs, BOLs, and PODs. Calibrate to your shop.
+        </div>
+      </div>
+
+      <div class="roi-output">
+        <div class="roi-out-head">
+          <span>output / monthly-savings.json</span>
+          <span class="live">computing</span>
+        </div>
+        <div class="roi-big">
+          <div class="label">Net savings, after Relay</div>
+          <div class="num"><span class="cur">$</span><span id="roi-save">5,684</span><span style="font-family: var(--mono); font-size: 0.28em; color: var(--muted); margin-left: 8px; vertical-align: 0.5em;">/ mo</span></div>
+          <div class="sub">That's <span class="amber" id="roi-hours">160</span> hours back per month — roughly <span class="amber" id="roi-fte">1.0 FTE</span> redeployed to higher-leverage work.</div>
+        </div>
+        <div class="roi-breakdown">
+          <div class="cell">
+            <div class="lbl">Today's cost</div>
+            <div class="v"><span id="roi-cost-now">$6,080</span> / mo</div>
+          </div>
+          <div class="cell">
+            <div class="lbl">With Relay</div>
+            <div class="v"><span id="roi-cost-new">$396</span> / mo</div>
+          </div>
+          <div class="cell">
+            <div class="lbl">Payback period</div>
+            <div class="v green"><span id="roi-payback">&lt; 1 week</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="shell">
+    <div class="section-head">
+      <div class="section-eyebrow">— Pricing</div>
+      <h2 class="section-title">Priced for operators, not enterprises.</h2>
+      <p class="section-sub">No per-seat games. No "talk to sales" gate for the basic stuff. Two tiers — pick by throughput, swap monthly.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- TIER 1 -->
+      <div class="tier">
+        <div class="tier-label">
+          <span class="tier-name">Operator</span>
+        </div>
+        <h2>For one team, one workflow.</h2>
+        <p class="blurb">Everything a small brokerage or a five-agent shop needs to stop drowning in paperwork.</p>
+        <div class="price-row">
+          <div class="price"><span class="cur">$</span>149</div>
+          <div class="per">/ month</div>
+        </div>
+        <ul>
+          <li><strong>500 documents</strong> processed / month</li>
+          <li><strong>2 destinations</strong> — HubSpot, Pipedrive, Follow Up Boss, or McLeod</li>
+          <li>All <span class="mono">340+</span> built-in templates</li>
+          <li>Email + drag-and-drop ingestion</li>
+          <li>14-day audit history</li>
+          <li>Standard support, <span class="mono">~24h</span> response</li>
+        </ul>
+        <div class="cta">
+          <a href="#waitlist" class="btn btn-ghost">Start with Operator</a>
+          <div class="fine">Includes a 30-day pilot. No card up front.</div>
+        </div>
+      </div>
+
+      <!-- TIER 2 -->
+      <div class="tier featured">
+        <div class="tier-label">
+          <span class="tier-name">Throughput</span>
+          <span class="tier-badge">Most chosen</span>
+        </div>
+        <h2>For agencies and 3PLs running real volume.</h2>
+        <p class="blurb">Branchable pipelines, custom templates, and the integrations that the bigger systems demand.</p>
+        <div class="price-row">
+          <div class="price"><span class="cur">$</span>399</div>
+          <div class="per">/ month</div>
+        </div>
+        <ul>
+          <li><strong>2,500 documents</strong> / month, then <span class="mono">$0.09</span> each</li>
+          <li><strong>Unlimited destinations</strong> incl. Salesforce, NetSuite, custom API</li>
+          <li>Custom templates &amp; training on your forms</li>
+          <li>Branchable workflows with validation rules</li>
+          <li>Full audit log, exports, and role-based access</li>
+          <li>Priority support, <span class="mono">&lt; 2h</span> response, dedicated Slack</li>
+        </ul>
+        <div class="cta">
+          <a href="#waitlist" class="btn btn-primary">Join the waitlist for Throughput</a>
+          <div class="fine">Volume &gt; 10k docs/mo? <a href="#contact" style="color: var(--text); text-decoration: underline; text-decoration-color: var(--border-2);">Talk to us.</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="shell">
+    <div class="faq-grid">
+      <div>
+        <div class="section-eyebrow">— FAQ</div>
+        <h2 class="section-title" style="font-size: clamp(28px, 3.4vw, 40px);">The questions we actually get.</h2>
+        <p class="section-sub" style="font-size: 15px;">Still chewing on something? <a href="#waitlist" style="color: var(--text); text-decoration: underline; text-decoration-color: var(--border-2);">Ping us in the waitlist note</a> — a real person responds.</p>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary>How is Relay different from generic OCR or Zapier-style scrapers?<span class="icon"></span></summary>
+          <div class="a">OCR gives you text. Relay gives you <span class="mono">structured fields</span> — with confidence scores, validation rules, and a write-back to your CRM or TMS. We're trained on the documents your industry actually runs on (rate confs, MLS sheets, BOLs), not generic invoices. The output is a record, not a string.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What happens when the AI gets a field wrong?<span class="icon"></span></summary>
+          <div class="a">Every field comes back with a confidence score. You set the threshold — say, <span class="mono">95%</span> — and anything below routes to a one-click human review queue. We've measured a <span class="mono">99.2%</span> straight-through rate on common templates; the remaining <span class="mono">0.8%</span> gets eyeballs in under a minute.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How long does onboarding actually take?<span class="icon"></span></summary>
+          <div class="a">For standard templates and a supported CRM (HubSpot, Follow Up Boss, McLeod, Salesforce, Pipedrive): <span class="mono">~90 minutes</span> with our team on a Zoom. For custom forms or non-standard destinations: <span class="mono">3–7 days</span>, including training on a sample set of your documents.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Where does our data live? Is it used to train models?<span class="icon"></span></summary>
+          <div class="a">Data is processed in <span class="mono">us-east-1</span> on isolated tenancy and deleted from extraction infrastructure within 24 hours. <span class="mono">Your documents are never used to train shared models.</span> SOC 2 Type II is in progress; we'll share the report under NDA.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What if we go over the monthly document limit?<span class="icon"></span></summary>
+          <div class="a">On <strong>Operator</strong> we soft-cap at <span class="mono">500</span> and notify you at 80%. On <strong>Throughput</strong>, overage runs at <span class="mono">$0.09</span> per doc — no surprise bills, no service suspension. You can also upshift mid-month, prorated.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can it handle handwriting, signatures, and bad scans?<span class="icon"></span></summary>
+          <div class="a">Yes — that's most of what our customers send us. Faxed BOLs, signed riders, handwritten amendments. We score those lower in confidence (correctly), but extraction works. We've intentionally not built around the assumption of clean PDFs.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Do you offer a pilot before we commit?<span class="icon"></span></summary>
+          <div class="a">Every account gets a <span class="mono">30-day pilot</span>, no card up front. You bring 100 of your real documents and a destination; we set it up; you measure. If it doesn't pay back inside the pilot, you walk.</div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section class="waitlist" id="waitlist">
+  <div class="shell">
+    <div class="waitlist-card">
+      <div class="waitlist-grid">
+        <div>
+          <span class="eyebrow"><span class="dot"></span>Cohort 03 · onboarding July 2026</span>
+          <h2 class="waitlist-h">Get in line for early access.</h2>
+          <p class="waitlist-sub">We take 30 teams per cohort and work them through the pilot personally. Drop your details — we'll be in touch within two business days with a setup window.</p>
+        </div>
+        <div id="form-mount">
+          <form class="waitlist-form" id="wl-form">
+            <div class="form-row">
+              <div class="input-wrap">
+                <label>Work email</label>
+                <input type="email" name="email" placeholder="you@company.com" required />
+              </div>
+              <div class="input-wrap">
+                <label>Company</label>
+                <input type="text" name="company" placeholder="Acme Logistics" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="input-wrap">
+                <label>Industry</label>
+                <select name="industry" required>
+                  <option value="">Select industry…</option>
+                  <option>Real estate agency</option>
+                  <option>Logistics / 3PL</option>
+                  <option>Freight brokerage</option>
+                  <option>Property management</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="input-wrap">
+                <label>Docs per month</label>
+                <select name="volume" required>
+                  <option value="">Volume…</option>
+                  <option>Under 200</option>
+                  <option>200 – 1,000</option>
+                  <option>1,000 – 5,000</option>
+                  <option>5,000+</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Request access →</button>
+            <div class="form-tos">By joining you agree to our terms · No spam, just one onboarding note</div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="shell">
+    <div class="foot-row">
+      <div class="foot-left">
+        <a class="brand" href="#"><span class="logomark"><span></span></span><span class="brand-name">Relay</span></a>
+        <p>Document automation for operators. Built in Austin, TX. SOC 2 Type II in progress.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <div class="h">Product</div>
+          <a href="#">Platform</a><a href="#">Integrations</a><a href="#">Templates</a><a href="#">Changelog</a>
+        </div>
+        <div class="foot-col">
+          <div class="h">Company</div>
+          <a href="#">About</a><a href="#">Customers</a><a href="#">Careers</a><a href="#">Press</a>
+        </div>
+        <div class="foot-col">
+          <div class="h">Resources</div>
+          <a href="#">Docs</a><a href="#">API</a><a href="#">Security</a><a href="#">Status</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <div>© 2026 Relay Systems, Inc. · All systems operational</div>
+      <div>v1.2.4 · build 88a4f2</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Cycle the pipeline data so it feels alive
+  (function() {
+    const docs = [
+      { title: "Rate_Confirmation_8821.pdf", load: "L-8821", origin: "Dallas, TX", rate: "$2,840" },
+      { title: "BOL_Westlake_4471.pdf",       load: "L-8822", origin: "Memphis, TN", rate: "$1,910" },
+      { title: "Listing_Agreement_Maple.pdf", load: "RE-2017", origin: "Maple Ave",   rate: "$485,000" },
+      { title: "Purchase_Contract_Oak.pdf",   load: "RE-2018", origin: "Oak St",      rate: "$612,000" },
+      { title: "POD_Carrier_77b.pdf",         load: "L-8823", origin: "Phoenix, AZ", rate: "$3,210" },
+    ];
+    let i = 0;
+    const t = document.getElementById('doc-title');
+    const fl = document.getElementById('f-load');
+    const fo = document.getElementById('f-origin');
+    const fr = document.getElementById('f-rate');
+    const today = document.getElementById('m-today');
+    const queue = document.getElementById('m-queue');
+    const runId = document.getElementById('run-id');
+    const procTime = document.getElementById('proc-time');
+    let count = 1284;
+    setInterval(() => {
+      i = (i + 1) % docs.length;
+      const d = docs[i];
+      t.textContent = d.title;
+      fl.textContent = d.load;
+      fo.textContent = d.origin;
+      fr.textContent = d.rate;
+      count += Math.floor(Math.random() * 3) + 1;
+      today.innerHTML = count.toLocaleString() + ' <span class="delta">▲ 12%</span>';
+      queue.textContent = (Math.floor(Math.random() * 5) + 1) + ' docs';
+      const hex = Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+      runId.textContent = 'run #' + hex + '-' + (1188 + i);
+      procTime.textContent = (1.8 + Math.random() * 1.4).toFixed(1) + 's';
+    }, 2400);
+  })();
+
+  // ROI calculator
+  (function() {
+    const $docs = document.getElementById('roi-docs');
+    const $min  = document.getElementById('roi-min');
+    const $rate = document.getElementById('roi-rate');
+    if (!$docs) return;
+    const $dv = document.getElementById('roi-docs-v');
+    const $mv = document.getElementById('roi-min-v');
+    const $rv = document.getElementById('roi-rate-v');
+    const $save = document.getElementById('roi-save');
+    const $hours = document.getElementById('roi-hours');
+    const $fte = document.getElementById('roi-fte');
+    const $now = document.getElementById('roi-cost-now');
+    const $new = document.getElementById('roi-cost-new');
+    const $pay = document.getElementById('roi-payback');
+
+    const fmt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function calc() {
+      const docs = +$docs.value;
+      const min  = +$min.value;
+      const rate = +$rate.value;
+      // current cost: docs × min/doc × ($/hr ÷ 60)
+      const costNow = docs * min * (rate / 60);
+      // with Relay: assume 0.4 min/doc human review (mostly hands-off) + plan cost
+      const planCost = docs <= 500 ? 149 : 399 + Math.max(0, docs - 2500) * 0.09;
+      const costNew = docs * 0.4 * (rate / 60) + planCost;
+      const save = Math.max(0, costNow - costNew);
+      const hoursBack = Math.round(docs * (min - 0.4) / 60);
+      const fte = (hoursBack / 160).toFixed(1);
+      const payback = save > 5000 ? '< 1 week' : save > 1500 ? '< 2 weeks' : save > 500 ? '< 1 month' : '~ 6 weeks';
+
+      $dv.textContent = fmt(docs);
+      $mv.textContent = min;
+      $rv.textContent = rate;
+      $save.textContent = fmt(save);
+      $hours.textContent = fmt(hoursBack);
+      $fte.textContent = fte + ' FTE';
+      $now.textContent = '$' + fmt(costNow);
+      $new.textContent = '$' + fmt(costNew);
+      $pay.textContent = payback;
+    }
+    [$docs, $min, $rate].forEach(el => el.addEventListener('input', calc));
+    calc();
+  })();
+
+  // Waitlist submit
+  (function() {
+    const form = document.getElementById('wl-form');
+    const mount = document.getElementById('form-mount');
+    if (!form) return;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pos = 247 + Math.floor(Math.random() * 80);
+      mount.innerHTML = `
+        <div class="submitted">
+          <div class="check">✓</div>
+          <div>
+            <div style="font-weight: 500; margin-bottom: 4px;">You're on the list.</div>
+            <div style="color: var(--text-dim); font-family: var(--mono); font-size: 12px;">We'll be in touch within 2 business days.</div>
+          </div>
+          <div class="pos">#${pos}</div>
+        </div>
+      `;
+    });
+  })();
+</script>
+
+</body>
+</html>

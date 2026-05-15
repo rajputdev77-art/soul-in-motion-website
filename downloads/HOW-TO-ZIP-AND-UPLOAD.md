@@ -1,0 +1,404 @@
+# HOW TO ZIP AND UPLOAD — Soul in Motion Master Guide
+
+> Read once. Bookmark. Use this every time you ship a product to Gumroad or Prompt.base.
+
+By Dev Rajput · Soul in Motion
+
+---
+
+## Part 1 — Which Files to Select for Each Product ZIP
+
+For each product, select **only** the files listed below, then ZIP them. Do **not** ZIP the parent folder — ZIP the contents (so when the buyer unzips, they don't see a useless extra wrapper folder).
+
+### Product 1 — AI Content Automation Kit
+**ZIP filename:** `AI-Content-Automation-Kit.zip`
+
+Select inside `downloads/product1/`:
+- `README.md`
+- `workflow.json`
+- `prompts.md`
+- `setup-guide.html`
+
+### Product 2 — Micro-SaaS API Blueprint
+**ZIP filename:** `Micro-SaaS-API-Blueprint.zip`
+
+Select inside `downloads/product2/`:
+- `micro-saas-api-blueprint.md`
+- `prompts.md`
+
+### Product 3 — SMB Dashboard Starter Kit
+**ZIP filename:** `SMB-Dashboard-Starter-Kit.zip`
+
+Select inside `downloads/product3/`:
+- `smb-dashboard-guide.md`
+- `dashboard-template-instructions.md`
+- `prompts.md`
+
+### Product 4 — Client Portal HTML Template
+**ZIP filename:** `Client-Portal-HTML-Template.zip`
+
+Select the **entire `client-portal/` folder** inside `downloads/product4/` (so the buyer unzips to a clean folder ready to deploy):
+- `client-portal/index.html`
+- `client-portal/dashboard.html`
+- `client-portal/style.css`
+- `client-portal/script.js`
+- `client-portal/README.md`
+
+### Product 5 — FinOps Audit and Savings Kit
+**ZIP filename:** `FinOps-Audit-Savings-Kit.zip`
+
+Select inside `downloads/product5/`:
+- `finops-audit-kit.md`
+- `audit-checklist.md`
+- `prompts.md`
+
+### Product 6 — Relay (AI Document → CRM Landing Page)
+**ZIP filename:** `Relay-AI-Document-CRM-Landing.zip`
+
+Select inside `downloads/product6/`:
+- `Relay-Landing.html`
+- `README.md`
+
+### Product 7 — Console Kit (AI API Dashboard Template, 5 screens)
+**ZIP filename:** `Console-Kit-AI-API-Dashboard.zip`
+
+Select the **entire `console-kit/` folder** inside `downloads/product7/`. This package ships an entire branded folder so the buyer unzips to a complete, self-contained template:
+- `console-kit/index.html` (buyer-facing demo)
+- `console-kit/01-Console.html`
+- `console-kit/02-Logs.html`
+- `console-kit/03-Empty.html`
+- `console-kit/04-SignIn.html`
+- `console-kit/05-Pricing.html`
+- `console-kit/tokens.css`
+- `console-kit/kit.css`
+- `console-kit/README.md`
+- `console-kit/PROMPT.md`
+- `console-kit/LICENSE.md`
+
+Also include the top-level Soul-in-Motion `README.md` from `downloads/product7/` so the buyer sees brand attribution before they unwrap.
+
+### Product 8 — Meridian (Owner's Briefing BI Dashboard)
+**ZIP filename:** `Meridian-BI-Dashboard.zip`
+
+Select inside `downloads/product8/`:
+- `Meridian-BI-Dashboard.html`
+- `README.md`
+
+---
+
+## Part 2 — How to Create a ZIP on Windows
+
+### Method A — Right-click (easiest)
+
+1. Open File Explorer. Navigate to the product folder (e.g., `downloads\product1\`).
+2. Select all the files listed for that product (hold `Ctrl` and click each one to select multiple).
+3. Right-click any selected file → **Send to** → **Compressed (zipped) folder**.
+4. Windows creates a `.zip` file in the same folder, named after the first selected file.
+5. Rename the ZIP to the exact filename above (e.g., `AI-Content-Automation-Kit.zip`).
+
+### Method B — Compress to ZIP (Windows 11)
+
+1. Select the files as above.
+2. Right-click → **Compress to ZIP file**.
+3. Rename the result.
+
+### Method C — PowerShell (for batch ZIP creation)
+
+Open PowerShell in the `downloads\` folder. Run:
+
+```powershell
+Compress-Archive -Path .\product1\* -DestinationPath .\AI-Content-Automation-Kit.zip
+Compress-Archive -Path .\product2\* -DestinationPath .\Micro-SaaS-API-Blueprint.zip
+Compress-Archive -Path .\product3\* -DestinationPath .\SMB-Dashboard-Starter-Kit.zip
+Compress-Archive -Path .\product4\client-portal -DestinationPath .\Client-Portal-HTML-Template.zip
+Compress-Archive -Path .\product5\* -DestinationPath .\FinOps-Audit-Savings-Kit.zip
+Compress-Archive -Path .\product6\* -DestinationPath .\Relay-AI-Document-CRM-Landing.zip
+Compress-Archive -Path .\product7\* -DestinationPath .\Console-Kit-AI-API-Dashboard.zip
+Compress-Archive -Path .\product8\* -DestinationPath .\Meridian-BI-Dashboard.zip
+```
+
+All 8 ZIPs created in one shot. Sit back.
+
+### Verify each ZIP before uploading
+
+1. Double-click each ZIP — Windows opens it as a folder.
+2. Confirm only the intended files are inside (no `.DS_Store`, no `Thumbs.db`, no extra wrapper folders).
+3. If you see clutter, delete the ZIP, clean up the source folder, re-zip.
+
+---
+
+## Part 3 — Exactly Where to Upload on Gumroad (Step by Step)
+
+### One-time setup (do this once, ever)
+
+1. Go to [gumroad.com](https://gumroad.com) and sign in (you already have `rajputdev77.gumroad.com`).
+2. Top-right menu → **Settings** → confirm payout method (PayPal or bank) is set up. **You will not get paid without this.**
+3. **Settings → Profile** → upload a clean square avatar, set bio to one line: *"AI systems, automation kits, and digital products built by Dev Rajput."*
+
+### For each new product (~7 minutes per product)
+
+1. From the dashboard, click the **+ New product** button (top-right).
+2. **Type:** select **Digital product**.
+3. **Name:** enter the product name (use the exact titles from Part 6 below).
+4. **Price:** enter the dollar amount (use the prices from Part 6 below).
+5. Click **Next: Customize**.
+6. **Cover:** click **Upload** → select the matching `productX.png` from `downloads/thumbnails/`.
+7. **Description:** paste the description text from Part 6 below. Use the rich-text formatting toolbar to bold the product name in the first line.
+8. **Content:** scroll to the **Content** section → click **Upload files** → select the matching `.zip` file from your computer.
+9. **Settings tab (on the right):**
+   - **Call to action:** "I want this!"
+   - **Customizable price:** OFF (keep it fixed unless you're A/B testing).
+   - **Limit total sales:** OFF.
+   - **Maximum number of downloads:** unlimited.
+10. Click **Save and continue** → **Publish**.
+11. Gumroad gives you a public URL like `https://rajputdev77.gumroad.com/l/SOMETHING`. **Copy this URL.**
+12. Paste this URL into the matching `<!-- PASTE GUMROAD PRODUCT N LINK HERE -->` placeholder in `index.html` (in the project root) — replace the placeholder href.
+13. Repeat for the remaining products.
+
+### After publishing all 5
+
+- Visit `rajputdev77.gumroad.com` in an incognito window. Confirm all 5 products appear and the cover images load.
+- Buy one yourself (use Gumroad's test mode or a real card with a refund) to confirm the download works end-to-end.
+
+---
+
+## Part 4 — Exactly Where to Upload on Prompt.base (Step by Step)
+
+Prompt.base is best for the prompt-bundle products (Products 1, 2, 3, 5). Product 4 is a code template — skip Prompt.base for it.
+
+### One-time setup
+
+1. Go to [prompt.base](https://prompt.base) and sign in (or sign up with email).
+2. Top-right avatar → **Profile** → upload your avatar, set bio.
+3. **Settings → Payouts** → connect your Stripe account. (Prompt.base pays via Stripe, not PayPal.)
+
+### For each new prompt product
+
+1. Top-right → **+ Submit Prompt** (or **+ New Listing**).
+2. **Title:** product name.
+3. **Category:** match it (Marketing, Productivity, Automation).
+4. **Tags:** add 5–8 relevant ones (e.g., `n8n`, `automation`, `claude`, `content marketing`, `ai`).
+5. **Prompt content:** paste the full text from the matching `prompts.md` file. Prompt.base wants the actual prompts visible in the listing.
+6. **Cover image:** upload the matching `productX.png`.
+7. **Price:** match the Gumroad price (or set 20% lower as a marketplace exclusive).
+8. **Description:** paste the description from Part 6 below.
+9. Click **Submit for Review**. Prompt.base typically approves within 24 hours.
+
+### Note on bundling
+
+Prompt.base sells single prompts well. For these kits which contain *multiple* prompts plus other assets (workflows, guides), list them as a **bundle** — set the higher price and include all the prompts together. Buyers prefer this over hunting for each prompt individually.
+
+---
+
+## Part 5 — When You Hit "Update", Not "New Product"
+
+Whenever you fix a typo or add a v2 of a file:
+
+1. Open the existing product on Gumroad.
+2. Click **Edit** → scroll to **Content**.
+3. Click the existing ZIP file → **Replace**.
+4. Upload the new ZIP. Click **Save**.
+
+Existing buyers automatically get access to the latest version on their next download. Optionally, click **Email customers** → "I just shipped an update" → write a short note.
+
+---
+
+## Part 6 — Listing Title, Description, and Price for Each Product
+
+Copy-paste these exactly into Gumroad and Prompt.base.
+
+### Product 1 — AI Content Automation Kit
+- **Title:** `AI Content Automation Kit — Blog → IG, LinkedIn & YouTube Shorts in 30 sec`
+- **Price:** **$39 USD**
+- **Description:**
+
+> **AI Content Automation Kit by Soul in Motion**
+>
+> Paste a blog post into Telegram. Receive an Instagram caption, a LinkedIn post, and 5 YouTube Shorts script ideas back — automatically, in under 30 seconds.
+>
+> The exact n8n workflow Dev Rajput uses to repurpose long-form writing into a week of social content. Built once. Runs forever. Pay-per-use AI cost: about 1 cent per blog post processed.
+>
+> **What you get:**
+> - The complete `workflow.json` — one-click import into n8n
+> - All three production-grade Claude prompts as editable text
+> - A printable HTML setup guide that walks a complete beginner through every step
+> - A README with troubleshooting for the 5 most common issues
+>
+> **Requirements:** Free n8n install (or n8n Cloud free tier), an Anthropic API key, and a free Telegram bot. Setup time: about 30 minutes.
+>
+> Built by Dev Rajput. Soul in Motion. Questions? DM @soulmotion.studio on Instagram.
+
+### Product 2 — Micro-SaaS API Blueprint
+- **Title:** `Micro-SaaS API Blueprint — Build & Charge for an API in 30 Days`
+- **Price:** **$29 USD**
+- **Description:**
+
+> **Micro-SaaS API Blueprint by Soul in Motion**
+>
+> The full design document for building, deploying, and charging for a focused single-purpose API. The exact path from "I have an idea" to "Stripe is depositing money into my account."
+>
+> **Inside:**
+> - What a Micro-SaaS API actually is and why it makes money
+> - 10 specific niche ideas you could ship this month
+> - The full free-tier tech stack (FastAPI + Railway + Supabase + Stripe + RapidAPI)
+> - Step-by-step Design → Build → Deploy → Charge sequence
+> - Stripe metered billing setup with copy-paste code
+> - How to list on RapidAPI marketplace and rank
+> - Realistic income projections at every revenue stage
+> - 4 production-ready AI prompts that automate endpoint design, documentation, billing code, and marketplace copy
+>
+> Written by someone who has actually shipped this. No theory. No fluff.
+
+### Product 3 — SMB Dashboard Starter Kit
+- **Title:** `SMB Dashboard Starter Kit — Sell $750 Dashboards to Small Businesses`
+- **Price:** **$34 USD**
+- **Description:**
+
+> **SMB Dashboard Starter Kit by Soul in Motion**
+>
+> The dashboard small business owners actually want — Shopify, Stripe, and Google Analytics merged into one dark, professional view, refreshed hourly, delivered to their inbox every Monday.
+>
+> Built in free Looker Studio. Reusable across every client.
+>
+> **What's inside:**
+> - The full strategy guide — what metrics matter, what to ignore, why
+> - A chart-by-chart rebuild blueprint for the entire dashboard (every chart, every formula, every styling setting)
+> - The 10 KPI formulas explained in plain English
+> - Three AI prompts that turn raw business data into client-ready insight reports — the work product behind a $500/month retainer
+> - The exact pitch email and pricing tiers ($750 setup → $500/month retainer)
+>
+> Sell three of these at the retainer tier and you've made back this kit 100x over.
+
+### Product 4 — Client Portal HTML Template
+- **Title:** `Client Portal HTML Template — Deploy in 10 min per Client`
+- **Price:** **$49 USD**
+- **Description:**
+
+> **Client Portal HTML Template by Soul in Motion**
+>
+> A drop-in client portal you can deploy on Vercel in 10 minutes per client. Dark, professional theme. Mobile responsive. Zero backend required.
+>
+> **What's inside:**
+> - `index.html` — password-protected login page
+> - `dashboard.html` — project status, recent files, message thread, next steps
+> - `style.css` — full dark theme (matches the soulinmotion.studio brand)
+> - `script.js` — login, navigation, message thread, session handling — all vanilla JS, no frameworks
+> - `README.md` — customization + Vercel deployment walkthrough + how to upgrade to real auth when you outgrow the password gate
+>
+> **Use case:** every freelancer / agency who has clients asking "where do I find the latest files?" Build it once. Reuse forever.
+>
+> No npm. No build step. Open the files, change the password, deploy.
+
+### Product 5 — FinOps Audit and Savings Kit
+- **Title:** `FinOps Audit & Savings Kit — Charge $7.5K to Audit Cloud Bills`
+- **Price:** **$44 USD**
+- **Description:**
+
+> **FinOps Audit and Savings Kit by Soul in Motion**
+>
+> The complete playbook for a productized FinOps consulting practice. Audit AWS or GCP accounts, find $15K–$60K/month in waste in five days, charge $3K–$25K per engagement.
+>
+> **What's inside:**
+> - The methodology — why FinOps prints money for solo consultants
+> - The 25-point cloud audit checklist (every item with console paths, what to look for, recommended action)
+> - How to write the client remediation report
+> - Pricing models — fixed fee, percentage of savings, hybrid
+> - Three battle-tested cold pitch email templates
+> - Four AI prompts that automate billing analysis, report writing, ROI projection, and personalized cold outreach
+> - Realistic 12-month earning trajectory ($80K–$200K year 1)
+>
+> Built for the solo consultant who wants a real practice — not another side gig.
+
+### Product 6 — Relay (AI Document → CRM Landing Page)
+- **Title:** `Relay — AI Document → CRM Landing Page Template (Single HTML File)`
+- **Price:** **$19 USD**
+- **Description:**
+
+> **Relay Landing Page Template by Soul in Motion**
+>
+> A waitlist-grade landing page for any AI document-extraction product. One file. No build. Drop in your brand, swap five strings, ship by tonight.
+>
+> **What's inside:**
+> - One self-contained `Relay-Landing.html` file (~73 KB)
+> - Hero with animated workflow diagram (SOURCE → AI → DESTINATIONS)
+> - Sectioned: nav, trust bar, hero, features, ROI, pricing, FAQ, footer
+> - Inline SVG illustrations — fully editable
+> - README with brand-swap instructions and one-click deploy guide (Vercel, Netlify, Cloudflare Pages)
+>
+> **Best for:** founders shipping AI tools (real estate, logistics, fintech, legal), indie hackers running waitlists before they build, agencies needing a base for AI client work.
+>
+> Vanilla HTML + CSS + JS. No npm. No frameworks.
+
+### Product 7 — Console Kit (AI API Dashboard, 5 Screens)
+- **Title:** `Console Kit — 5-Screen AI API Dashboard Template (Dark + Light)`
+- **Price:** **$49 USD**
+- **Description:**
+
+> **Console Kit by Soul in Motion**
+>
+> An AI API console template that doesn't look like a Tailwind UI clone. Five hand-tuned screens, dark and light modes, real interactivity. The marketing site and the app from one template. Ship by Friday.
+>
+> **What's inside:**
+> - **5 fully-built screens:** Console (KPIs + chart + API keys), Logs (live-tail + filters), Empty (day-0 onboarding), Sign-In (split layout), Pricing (3-tier with FAQ)
+> - Persistent dark/light theme toggle
+> - Tokenized: every color/type/spacing in one `tokens.css` (60-second rebrand)
+> - ~100 inline lucide-style icons, no icon-font dependency
+> - Buyer-facing demo page that links to every screen
+> - README, LICENSE, and the original Claude prompt for extending
+> - **Free upgrade to v1.1** (settings, team, webhook screens) and **v2.0** (Next.js + Tailwind + shadcn/ui port)
+>
+> **Tech:** static HTML + CSS + sprinkle of vanilla JS. No npm, no node_modules, no deps. Inter + JetBrains Mono. Responsive to 320px.
+>
+> 14-day refund · pay once · unlimited projects.
+
+### Product 8 — Meridian (Owner's Briefing BI Dashboard)
+- **Title:** `Meridian — Owner's Briefing BI Dashboard Template (Single HTML)`
+- **Price:** **$39 USD**
+- **Description:**
+
+> **Meridian BI Dashboard by Soul in Motion**
+>
+> A single-screen, owner-facing business briefing. The Monday-morning report a CFO actually opens. Built with editorial taste — warm-paper background, slate ink, single burnt-amber accent.
+>
+> **What's inside:**
+> - One self-contained `Meridian-BI-Dashboard.html` file (~51 KB)
+> - Hero KPI with prior-period comparison and plan tracking
+> - KPI row with month-over-month deltas (Orders, AOV, Repeat Rate, Gross Margin)
+> - Daily revenue chart with weekend highlighting and event annotations
+> - CAC / ROAS / Marketing Spend / LTV:CAC quad with trend lines
+> - Top SKUs table, ROAS-by-channel ranked bars, CAC-by-source 12-week trend
+> - Founder's read insight panel + cash & runway summary
+> - Date range filter (7D / 30D / 90D / QTD / YTD + custom)
+> - README with brand-swap and recurring-deliverable playbook
+>
+> **Best for:** founders wanting a beautiful internal dashboard, freelance analysts running monthly client reports ($500-2K retainers), agencies productizing a "monthly business review" deliverable.
+>
+> Vanilla HTML, no build step, prints to PDF gorgeously.
+
+---
+
+## Part 7 — After You're Live, Tell the World
+
+Once all 5 products are live on Gumroad:
+
+1. Update each `<!-- PASTE GUMROAD PRODUCT N LINK HERE -->` placeholder in the project root `index.html` with the live URL (replace the entire `href` value).
+2. Commit and push the website (so the live site links work).
+3. Post a launch tweet thread.
+4. Post a launch carousel on Instagram (@soulmotion.studio) — one slide per product.
+5. Post on LinkedIn — frame each product as "the system I built and now sell."
+
+---
+
+## Part 8 — Maintenance Checklist (monthly)
+
+- [ ] Read the last 5 customer reviews on each product. Address common complaints in a v2 update.
+- [ ] If a product hasn't sold in 30 days, lower the price by $5 or rewrite the cover image.
+- [ ] If a product is selling well, raise the price by $5 next month.
+- [ ] Add one new feature or one new AI prompt to your top seller. Email all past buyers with the update.
+
+---
+
+Questions? **rajputdev77.gumroad.com** or DM **@soulmotion.studio** on Instagram.
+
+— Dev Rajput
+Soul in Motion

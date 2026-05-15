@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Soul in Motion · Logo Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #1a1d24; font-family: 'Inter', sans-serif; color: #f2f5f9; }
+    *, *::before, *::after { box-sizing: border-box; }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="logos.jsx"></script>
+  <script type="text/babel" data-presets="react">
+    function Intro() {
+      return (
+        <div style={{
+          background: "#0A0B10",
+          color: "#F5F1E8",
+          padding: "40px 48px",
+          borderRadius: 12,
+          width: 1240,
+          display: "flex",
+          flexDirection: "column",
+          gap: 18,
+          border: "1px solid #1B2531",
+        }}>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#6B7689" }}>
+            brief · soul in motion
+          </div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: 42, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
+            Eight directions for a mark that has to live in many places.
+          </div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, lineHeight: 1.6, color: "#A8B2C1", maxWidth: 880 }}>
+            Your photo is beautiful — that vertical slit of amber against electric blue, the silhouette half-revealed. But as a literal logo it struggles: it goes muddy at favicon size, can't print in one color, and resists being recombined. So I've kept its <em>DNA</em> — the amber/blue palette and the slit-of-light motif — and used it across cleaner marks. Concept 04 still uses the photo directly if you want that personal stamp.
+          </div>
+          <div style={{ display: "flex", gap: 28, marginTop: 8, fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#6B7689", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+            <span>palette · <span style={{ color: "#E8A04A" }}>amber</span> · <span style={{ color: "#3D8FE0" }}>electric blue</span> · <span style={{ color: "#F5F1E8" }}>paper</span> · ink</span>
+            <span>type · inter · jetbrains mono</span>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      return (
+        <DesignCanvas title="Soul in Motion · Logo Concepts" initialZoom={0.85}>
+          <DCSection id="intro" title="00 · brief">
+            <DCArtboard id="brief" label="brief" width={1240} height={280}>
+              <Intro />
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="marks" title="01 · primary marks">
+            <DCArtboard id="mobius"   label="01 · möbius monogram"     width={460} height={460}><MobiusMark /></DCArtboard>
+            <DCArtboard id="aperture" label="02 · aperture (photo DNA)" width={460} height={460}><ApertureMark /></DCArtboard>
+            <DCArtboard id="particle" label="03 · particle flow"        width={460} height={460}><ParticleMark /></DCArtboard>
+            <DCArtboard id="portrait" label="04 · portrait lockup"      width={460} height={460}><PortraitMark /></DCArtboard>
+            <DCArtboard id="ripple"   label="05 · ripple"               width={460} height={460}><RippleMark /></DCArtboard>
+            <DCArtboard id="comet"    label="06 · comet"                width={460} height={460}><CometMark /></DCArtboard>
+            <DCArtboard id="stack"    label="07 · brutalist stack"      width={460} height={460}><StackMark /></DCArtboard>
+            <DCArtboard id="kinetic"  label="08 · kinetic wordmark"     width={460} height={460}><KineticMark /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="apps" title="02 · applications (using the möbius mark)">
+            <DCArtboard id="favicon"  label="favicon scaling"  width={720} height={300}><FaviconApp /></DCArtboard>
+            <DCArtboard id="appicon"  label="app icon"         width={520} height={420}><AppIconApp /></DCArtboard>
+            <DCArtboard id="avatar"   label="social avatars"   width={620} height={320}><SocialAvatarApp /></DCArtboard>
+            <DCArtboard id="card"     label="business card"    width={520} height={500}><BusinessCardApp /></DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

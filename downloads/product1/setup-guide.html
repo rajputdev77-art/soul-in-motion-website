@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Content Automation Kit — Visual Setup Guide</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #0b0b0c;
+    color: #e8e8e8;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+    font-size: 15px;
+  }
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 56px 48px;
+  }
+  header.brand {
+    border-bottom: 1px solid #2a2a2e;
+    padding-bottom: 24px;
+    margin-bottom: 36px;
+  }
+  .brand-mark {
+    font-family: 'Georgia', serif;
+    font-size: 18px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #b08d57;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: 'Georgia', serif;
+    font-size: 38px;
+    line-height: 1.15;
+    margin: 0 0 8px 0;
+    color: #f5f5f7;
+    font-weight: 600;
+  }
+  .subtitle {
+    color: #9a9aa0;
+    font-size: 16px;
+    margin: 0;
+  }
+  h2 {
+    font-family: 'Georgia', serif;
+    font-size: 24px;
+    color: #f5f5f7;
+    margin: 48px 0 12px 0;
+    padding-top: 24px;
+    border-top: 1px solid #2a2a2e;
+  }
+  h2 .num {
+    color: #b08d57;
+    margin-right: 10px;
+  }
+  h3 {
+    font-size: 17px;
+    color: #f5f5f7;
+    margin: 28px 0 8px 0;
+  }
+  p { margin: 0 0 14px 0; color: #c8c8cc; }
+  ul, ol { margin: 0 0 16px 0; padding-left: 22px; color: #c8c8cc; }
+  li { margin: 6px 0; }
+  code {
+    background: #1c1c1f;
+    color: #b08d57;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'SF Mono', Menlo, monospace;
+    font-size: 13px;
+  }
+  .screenshot {
+    border: 1px dashed #444448;
+    background: #141417;
+    border-radius: 6px;
+    padding: 32px 24px;
+    margin: 18px 0 22px 0;
+    text-align: center;
+    color: #6c6c72;
+    font-size: 13px;
+    font-style: italic;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+  }
+  .screenshot .label {
+    color: #b08d57;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+    font-style: normal;
+  }
+  .screenshot .desc {
+    color: #8a8a90;
+  }
+  .callout {
+    background: #141417;
+    border-left: 3px solid #b08d57;
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout strong { color: #f5f5f7; }
+  footer.foot {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid #2a2a2e;
+    color: #6c6c72;
+    font-size: 13px;
+    text-align: center;
+  }
+  footer.foot a { color: #b08d57; text-decoration: none; }
+  .toc {
+    background: #141417;
+    border: 1px solid #2a2a2e;
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 24px 0 36px 0;
+  }
+  .toc h3 { margin-top: 0; }
+  .toc ol { margin: 0; }
+  .toc a { color: #b08d57; text-decoration: none; }
+  @media print {
+    body { background: white; color: #1a1a1a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 0; }
+    header.brand { border-color: #ddd; }
+    h1, h2, h3 { color: #1a1a1a; }
+    p, li { color: #2a2a2a; }
+    .screenshot { background: #f5f5f5; border-color: #bbb; color: #555; }
+    .screenshot .label { color: #8a6730; }
+    .callout { background: #f5f1e8; border-left-color: #8a6730; }
+    code { background: #efefef; color: #8a6730; }
+    h2 { border-top-color: #ddd; }
+    .brand-mark { color: #8a6730; }
+    .toc { background: #f5f5f5; border-color: #ddd; }
+    .toc a { color: #8a6730; }
+    footer.foot { border-color: #ddd; color: #555; }
+    footer.foot a { color: #8a6730; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="brand">
+  <div class="brand-mark">Soul in Motion · Setup Guide</div>
+  <h1>AI Content Automation Kit</h1>
+  <p class="subtitle">A visual, step-by-step guide to installing and running your automation in under 30 minutes.</p>
+</header>
+
+<div class="toc">
+  <h3>Inside this guide</h3>
+  <ol>
+    <li><a href="#s1">Get your three keys</a></li>
+    <li><a href="#s2">Install n8n</a></li>
+    <li><a href="#s3">Import the workflow</a></li>
+    <li><a href="#s4">Connect your credentials</a></li>
+    <li><a href="#s5">Activate and test</a></li>
+    <li><a href="#s6">If something breaks</a></li>
+  </ol>
+</div>
+
+<h2 id="s1"><span class="num">01</span>Get your three keys</h2>
+<p>Before you touch n8n, gather these three things. Save them in a notes file.</p>
+
+<h3>1A — Anthropic API Key</h3>
+<ol>
+  <li>Go to <code>console.anthropic.com</code> and sign in.</li>
+  <li>Click <strong>API Keys</strong> in the left menu.</li>
+  <li>Click the <strong>Create Key</strong> button. Name it "n8n content kit".</li>
+  <li>Copy the key (starts with <code>sk-ant-</code>) and paste into your notes.</li>
+</ol>
+<div class="screenshot">
+  <div class="label">Screenshot Placeholder · 01A</div>
+  <div class="desc">Anthropic Console — API Keys page with the "Create Key" button highlighted in the top-right corner.</div>
+</div>
+
+<h3>1B — Telegram Bot Token</h3>
+<ol>
+  <li>Open Telegram. Search for <code>@BotFather</code>. Open the chat.</li>
+  <li>Send <code>/newbot</code>. BotFather will ask for a name, then a username (must end in <code>bot</code>).</li>
+  <li>BotFather replies with your access token — a long string like <code>123456789:ABCdef...</code>. Copy it.</li>
+</ol>
+<div class="screenshot">
+  <div class="label">Screenshot Placeholder · 01B</div>
+  <div class="desc">Telegram chat with @BotFather showing the /newbot flow and the token response highlighted.</div>
+</div>
+
+<h3>1C — Your Telegram Chat ID</h3>
+<ol>
+  <li>Open the chat with your new bot. Send any message (say "hi").</li>
+  <li>In a browser, open: <code>https://api.telegram.org/bot&lt;YOUR_TOKEN&gt;/getUpdates</code> (replace <code>&lt;YOUR_TOKEN&gt;</code>).</li>
+  <li>Find the number after <code>"chat":{"id":</code>. That is your chat ID. Copy it.</li>
+</ol>
+
+<h2 id="s2"><span class="num">02</span>Install n8n</h2>
+<p>Pick one path. The cloud version is fastest.</p>
+
+<h3>Path A — n8n Cloud (zero installation)</h3>
+<ol>
+  <li>Go to <code>n8n.io/cloud</code>. Click <strong>Get started free</strong>.</li>
+  <li>Sign up with your email. Confirm. You will land in the editor.</li>
+</ol>
+
+<h3>Path B — Local install (free forever)</h3>
+<ol>
+  <li>Install Node.js LTS from <code>nodejs.org</code>. Click Next on every screen.</li>
+  <li>Open Terminal (Mac) or Command Prompt (Windows). Type <code>npx n8n</code> and press Enter.</li>
+  <li>Wait for the line <code>Editor is now accessible via: http://localhost:5678</code>.</li>
+  <li>Open that URL in your browser. Create your local account.</li>
+</ol>
+<div class="screenshot">
+  <div class="label">Screenshot Placeholder · 02</div>
+  <div class="desc">Empty n8n editor canvas immediately after first login, showing the left sidebar with "Workflows" and "Credentials" menu items.</div>
+</div>
+
+<h2 id="s3"><span class="num">03</span>Import the workflow</h2>
+<ol>
+  <li>In the n8n sidebar, click <strong>Workflows</strong>.</li>
+  <li>Click the <strong>+ Add workflow</strong> button (top right). An empty canvas opens.</li>
+  <li>Click the three-dot menu in the top-right corner of the canvas → <strong>Import from File</strong>.</li>
+  <li>Select the <code>workflow.json</code> file from this download.</li>
+  <li>The full 8-node workflow appears, with the Telegram trigger on the left and three Send Message nodes on the right.</li>
+</ol>
+<div class="screenshot">
+  <div class="label">Screenshot Placeholder · 03</div>
+  <div class="desc">Imported workflow showing the layout: Telegram Trigger → Extract Blog Text → three parallel Claude nodes → three Telegram Send nodes.</div>
+</div>
+
+<h2 id="s4"><span class="num">04</span>Connect your credentials</h2>
+<p>Right after import, every node will show a red error icon. That is expected — they need your keys.</p>
+
+<h3>4A — Anthropic credential</h3>
+<ol>
+  <li>Click any node titled <strong>Claude — Instagram Caption</strong> (or any of the three Claude nodes).</li>
+  <li>In the right panel, find <strong>Credential to connect with</strong> → click <strong>Create New</strong>.</li>
+  <li>Paste your Anthropic key into the <strong>API Key</strong> field. Click <strong>Save</strong>.</li>
+  <li>Open the other two Claude nodes and select the same credential from the dropdown — no need to recreate it.</li>
+</ol>
+
+<h3>4B — Telegram credential</h3>
+<ol>
+  <li>Click the <strong>Telegram Trigger</strong> node.</li>
+  <li>In the right panel, click <strong>Create New</strong> credential.</li>
+  <li>Paste your bot token into the <strong>Access Token</strong> field. Click <strong>Save</strong>.</li>
+  <li>Click each of the three <strong>Telegram — Send …</strong> nodes and select the same credential.</li>
+</ol>
+
+<h3>4C — Set Chat ID in each Send node</h3>
+<ol>
+  <li>For each of the three <strong>Telegram — Send …</strong> nodes, find the <strong>Chat ID</strong> field.</li>
+  <li>The expression <code>{{ $('Extract Blog Text').item.json.chatId }}</code> should already be filled in. Leave it. The chat ID is taken automatically from whoever messages the bot.</li>
+</ol>
+
+<div class="callout">
+  <strong>Pro tip:</strong> Leave Chat ID dynamic (as the expression above) so you can let other people use the bot too. Hard-code your numeric chat ID only if you want a private system that ignores everyone else.
+</div>
+
+<h2 id="s5"><span class="num">05</span>Activate and test</h2>
+<ol>
+  <li>In the top-right of the workflow canvas, flip the <strong>Active</strong> toggle to ON. It turns green.</li>
+  <li>Open Telegram. Open the chat with your bot.</li>
+  <li>Paste any blog post (a few paragraphs is fine). Press send.</li>
+  <li>Wait 10–30 seconds. You should receive three messages: Instagram caption, LinkedIn post, 5 YouTube Shorts ideas.</li>
+</ol>
+<div class="screenshot">
+  <div class="label">Screenshot Placeholder · 05</div>
+  <div class="desc">Telegram chat showing the user's blog-post message followed by three bot messages, each prefixed with an emoji and label (📸 Instagram / 💼 LinkedIn / 🎬 YouTube).</div>
+</div>
+
+<h2 id="s6"><span class="num">06</span>If something breaks</h2>
+<ul>
+  <li><strong>Nothing happens when I send a message:</strong> Confirm the workflow is Active. Re-paste the Telegram token.</li>
+  <li><strong>"Invalid API Key" error:</strong> Re-paste the Anthropic key. Confirm there is credit on your account.</li>
+  <li><strong>One of the three replies is missing:</strong> Click the node with a red badge. Read the error. Most often, the input was too long — keep blog posts under ~3000 words.</li>
+  <li><strong>Output is cut off mid-sentence:</strong> Open the relevant Claude node → Options → raise <strong>Max Tokens</strong> to 2000.</li>
+  <li><strong>"Node type unknown" on import:</strong> Update n8n. For local: stop and run <code>npx n8n@latest</code>. For Cloud: it auto-updates.</li>
+</ul>
+
+<footer class="foot">
+  Built by Dev Rajput · Soul in Motion · <a href="https://rajputdev77.gumroad.com">rajputdev77.gumroad.com</a><br>
+  Print this page for an offline reference.
+</footer>
+
+</div>
+</body>
+</html>

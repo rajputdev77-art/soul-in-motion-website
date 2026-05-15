@@ -1,0 +1,525 @@
+﻿<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>axon/api â€” logs</title>
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="kit.css" />
+<style>
+  /* ---------- Logs-specific ---------- */
+  .logs-shell { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 460px); gap: 0; min-height: calc(100vh - 52px); }
+  @media (max-width: 1100px) { .logs-shell { grid-template-columns: 1fr; } }
+
+  .logs-main { padding: 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+  .logs-filters {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .input {
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    padding: 6px 10px;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    color: var(--fg-0);
+    outline: 0;
+    transition: border-color var(--t-base) var(--ease);
+  }
+  .input::placeholder { color: var(--fg-3); }
+  .input:focus { border-color: var(--border-3); box-shadow: var(--ring-focus); }
+  .input.search { padding-left: 30px; min-width: 280px; }
+  .search-wrap { position: relative; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--fg-3); }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    padding: 5px 10px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-1);
+    cursor: pointer;
+    transition: border-color var(--t-base) var(--ease), background var(--t-base) var(--ease);
+  }
+  .chip:hover { border-color: var(--border-2); }
+  .chip.active { background: var(--bg-3); border-color: var(--border-3); color: var(--fg-0); }
+  .chip .x { color: var(--fg-3); margin-left: 2px; }
+
+  .live-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-1);
+    padding: 5px 10px;
+    background: var(--bg-1);
+    border: 1px solid var(--profit-edge);
+    border-radius: var(--r-md);
+    cursor: pointer;
+  }
+  .live-toggle .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--profit);
+    animation: pulse 2s var(--ease) infinite;
+  }
+
+  /* logs table */
+  .logs-table-wrap { background: var(--bg-1); border: 1px solid var(--border-1); border-radius: var(--r-lg); overflow: hidden; }
+  table.logs {
+    width: 100%; border-collapse: collapse;
+    font-family: var(--font-mono); font-size: 12px;
+  }
+  table.logs thead th {
+    text-align: left;
+    padding: 9px 14px;
+    font-family: var(--font-ui);
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-2);
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border-1);
+    white-space: nowrap;
+  }
+  table.logs tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border-1);
+    color: var(--fg-1);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  table.logs tbody tr { cursor: pointer; transition: background var(--t-base) var(--ease); }
+  table.logs tbody tr:hover td { background: var(--bg-2); }
+  table.logs tbody tr.selected td { background: var(--accent-soft); }
+  table.logs tbody tr.fresh td { animation: flashRow 1.6s var(--ease) both; }
+  @keyframes flashRow {
+    0% { background: var(--profit-soft); }
+    100% { background: transparent; }
+  }
+  .status-pill {
+    display: inline-flex; align-items: center;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+  }
+  .status-pill.s2 { background: var(--profit-soft); color: var(--profit); border-color: var(--profit-edge); }
+  .status-pill.s4 { background: var(--warn-soft);   color: var(--warn);   border-color: var(--warn-edge); }
+  .status-pill.s5 { background: var(--loss-soft);   color: var(--loss);   border-color: var(--loss-edge); }
+  .method {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 1px 5px; border-radius: 3px;
+  }
+  .method.post { background: var(--accent-soft); color: var(--accent); }
+  .method.get  { background: var(--profit-soft); color: var(--profit); }
+  .method.del  { background: var(--loss-soft);   color: var(--loss); }
+  .lat.fast { color: var(--profit); }
+  .lat.med  { color: var(--warn); }
+  .lat.slow { color: var(--loss); }
+
+  /* detail pane */
+  .logs-detail {
+    border-left: 1px solid var(--border-1);
+    background: var(--bg-1);
+    padding: 24px 24px 64px;
+    overflow-y: auto;
+    max-height: calc(100vh - 52px);
+    position: sticky; top: 52px;
+  }
+  .logs-detail h2 {
+    margin: 0 0 4px;
+    font-size: 16px; font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg-0);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logs-detail .kvs { display: grid; gap: 8px; margin: 14px 0 18px; }
+  .logs-detail .kv {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 12px;
+    gap: 12px;
+  }
+  .logs-detail .kv .k { color: var(--fg-2); }
+  .logs-detail .kv .v { color: var(--fg-0); text-align: right; }
+  .logs-detail .section-title {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-2);
+    margin: 18px 0 8px;
+  }
+  pre.json {
+    background: var(--bg-0);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--fg-0);
+    overflow-x: auto;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  :root[data-theme="light"] pre.json { background: #FCFAF2; }
+  pre.json .k { color: var(--accent); }
+  pre.json .s { color: var(--profit); }
+  pre.json .n { color: var(--warn); }
+  pre.json .p { color: var(--fg-2); }
+
+  /* timeline waterfall */
+  .waterfall { display: grid; gap: 6px; }
+  .wf-row { display: grid; grid-template-columns: 140px 1fr 60px; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--fg-1); }
+  .wf-bar { position: relative; height: 8px; background: var(--bg-2); border-radius: 2px; overflow: hidden; }
+  .wf-bar .seg { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+  .wf-bar .seg.queue  { background: var(--fg-3); }
+  .wf-bar .seg.auth   { background: var(--warn); }
+  .wf-bar .seg.model  { background: var(--accent); }
+  .wf-bar .seg.stream { background: var(--profit); }
+  .wf-num { text-align: right; color: var(--fg-0); }
+
+  .copy-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-2);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: color var(--t-base) var(--ease);
+  }
+  .copy-link:hover { color: var(--fg-0); }
+</style>
+</head>
+<body>
+
+<!-- ============== TOP BAR ============== -->
+<header class="topbar">
+  <div class="brand">
+    <div class="logo-mark">âŸ</div>
+    <div class="wordmark">axon<span class="slash">/</span><span class="sub">api</span></div>
+  </div>
+  <button class="org-switch">
+    <span>octogon-labs</span>
+    <span class="chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+  </button>
+  <nav class="topnav">
+    <a href="01-Console.html">overview</a>
+    <a href="#">keys</a>
+    <a href="#">docs</a>
+    <a class="active" href="02-Logs.html">logs</a>
+    <a href="#">billing</a>
+    <a href="#">team</a>
+  </nav>
+  <div class="top-right">
+    <div class="env-switch" id="env-switch">
+      <button class="active" data-env="live"><span class="dot"></span>live</button>
+      <button data-env="test"><span class="dot"></span>test</button>
+    </div>
+    <button class="search-trigger">
+      <svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>search docs, keysâ€¦</span>
+      <span class="kbd">âŒ˜K</span>
+    </button>
+    <button class="icon-btn" id="theme-toggle" title="Toggle theme">
+      <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+    <div class="avatar">RN</div>
+  </div>
+</header>
+
+<main class="logs-shell">
+
+  <section class="logs-main">
+
+    <div class="page-head">
+      <div>
+        <div class="crumbs">octogon-labs<span class="slash">/</span>workspace<span class="slash">/</span><span class="curr">logs</span></div>
+        <h1>Request logs</h1>
+      </div>
+      <div class="page-head-right">
+        <span class="ticker-dot"></span>
+        <span><b style="color:var(--fg-0)" id="req-counter">1,243</b> rpm Â· <b style="color:var(--fg-0)">0.03%</b> errors Â· p99 <b style="color:var(--fg-0)">412 ms</b></span>
+      </div>
+    </div>
+
+    <div class="logs-filters">
+      <div class="search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="input search" placeholder="filter: status:200 endpoint:/completions key:prod*" />
+      </div>
+      <button class="chip active">last 1h <span class="x">Ã—</span></button>
+      <button class="chip">status: 4xx, 5xx <span class="x">Ã—</span></button>
+      <button class="chip">+ filter</button>
+      <button class="live-toggle" id="live-toggle">
+        <span class="dot"></span>
+        <span>live tail</span>
+      </button>
+    </div>
+
+    <div class="logs-table-wrap">
+      <table class="logs">
+        <thead>
+          <tr>
+            <th style="width:80px">status</th>
+            <th style="width:64px">verb</th>
+            <th>endpoint</th>
+            <th style="width:110px">latency</th>
+            <th style="width:110px">tokens</th>
+            <th style="width:130px">key</th>
+            <th style="width:80px">cost</th>
+            <th style="width:90px">time</th>
+            <th style="width:60px">req id</th>
+          </tr>
+        </thead>
+        <tbody id="logs-tbody">
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ============== DETAIL PANE ============== -->
+  <aside class="logs-detail" id="detail-pane">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--fg-2);">req_8Gp2cqZ4tN1</span>
+      <div style="display:flex;gap:6px;">
+        <button class="btn sm">replay</button>
+        <button class="btn sm">share â†’</button>
+      </div>
+    </div>
+
+    <h2>
+      <span class="status-pill s2">200</span>
+      <span class="method post">POST</span>
+      <span style="font-family:var(--font-mono);font-size:14px;color:var(--fg-0);font-weight:500;">/completions</span>
+    </h2>
+    <p style="margin:6px 0 0;color:var(--fg-2);font-family:var(--font-mono);font-size:11px;">2026-05-15 13:58:41.218 UTC Â· 412 ms total</p>
+
+    <div class="section-title">Request meta</div>
+    <div class="kvs">
+      <div class="kv"><span class="k">key</span><span class="v">axon_live_â€¢â€¢â€¢â€¢a3f2 <span style="color:var(--fg-2)">Â· productionÂ·main</span></span></div>
+      <div class="kv"><span class="k">model</span><span class="v">axon-mini-v3</span></div>
+      <div class="kv"><span class="k">tokens</span><span class="v">412 in Â· 68 out Â· 480 total</span></div>
+      <div class="kv"><span class="k">cost</span><span class="v">$0.00192</span></div>
+      <div class="kv"><span class="k">region</span><span class="v">iad-1 Â· pop-7</span></div>
+      <div class="kv"><span class="k">ip</span><span class="v">198.51.100.42 Â· sf, us</span></div>
+      <div class="kv"><span class="k">ua</span><span class="v">axon-node/2.4.0 Â· node 20</span></div>
+    </div>
+
+    <div class="section-title">Waterfall</div>
+    <div class="waterfall">
+      <div class="wf-row">
+        <span>queue</span>
+        <span class="wf-bar"><span class="seg queue" style="left:0%;width:2%"></span></span>
+        <span class="wf-num">8 ms</span>
+      </div>
+      <div class="wf-row">
+        <span>auth + rate-limit</span>
+        <span class="wf-bar"><span class="seg auth" style="left:2%;width:4%"></span></span>
+        <span class="wf-num">16 ms</span>
+      </div>
+      <div class="wf-row">
+        <span>model Â· forward</span>
+        <span class="wf-bar"><span class="seg model" style="left:6%;width:78%"></span></span>
+        <span class="wf-num">322 ms</span>
+      </div>
+      <div class="wf-row">
+        <span>stream + serialize</span>
+        <span class="wf-bar"><span class="seg stream" style="left:84%;width:16%"></span></span>
+        <span class="wf-num">66 ms</span>
+      </div>
+    </div>
+
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Request body</span>
+      <span class="copy-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        copy
+      </span>
+    </div>
+<pre class="json">{
+  <span class="k">"model"</span><span class="p">:</span> <span class="s">"axon-mini-v3"</span><span class="p">,</span>
+  <span class="k">"prompt"</span><span class="p">:</span> <span class="s">"summarise the changelog below in 3 bullets:\n\n..."</span><span class="p">,</span>
+  <span class="k">"max_tokens"</span><span class="p">:</span> <span class="n">256</span><span class="p">,</span>
+  <span class="k">"temperature"</span><span class="p">:</span> <span class="n">0.4</span><span class="p">,</span>
+  <span class="k">"stop"</span><span class="p">:</span> [<span class="s">"\n\n"</span>]
+}</pre>
+
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Response body</span>
+      <span class="copy-link">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        copy
+      </span>
+    </div>
+<pre class="json">{
+  <span class="k">"id"</span><span class="p">:</span> <span class="s">"cmpl_8GFp2c1qZ"</span><span class="p">,</span>
+  <span class="k">"choices"</span><span class="p">:</span> [{
+    <span class="k">"text"</span><span class="p">:</span> <span class="s">"- adds /completions/stream over SSE\n- raises max_tokens cap to 128k\n- deprecates `top_k`"</span><span class="p">,</span>
+    <span class="k">"finish_reason"</span><span class="p">:</span> <span class="s">"stop"</span>
+  }]<span class="p">,</span>
+  <span class="k">"usage"</span><span class="p">:</span> { <span class="k">"prompt_tokens"</span><span class="p">:</span> <span class="n">412</span><span class="p">,</span> <span class="k">"completion_tokens"</span><span class="p">:</span> <span class="n">68</span><span class="p">,</span> <span class="k">"cost_usd"</span><span class="p">:</span> <span class="n">0.00192</span> }
+}</pre>
+
+  </aside>
+</main>
+
+<script>
+  // theme toggle
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('theme-toggle');
+  function applyThemeIcons() {
+    const dark = root.getAttribute('data-theme') === 'dark';
+    themeBtn.querySelector('.theme-icon-dark').style.display  = dark ? '' : 'none';
+    themeBtn.querySelector('.theme-icon-light').style.display = dark ? 'none' : '';
+  }
+  try { const t = localStorage.getItem('axon_theme'); if (t) root.setAttribute('data-theme', t); } catch(e){}
+  applyThemeIcons();
+  themeBtn.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('axon_theme', next); } catch(e){}
+    applyThemeIcons();
+  });
+
+  // env switch
+  const envSwitch = document.getElementById('env-switch');
+  envSwitch.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    envSwitch.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  });
+
+  // ------------ generate logs ------------
+  const endpoints = [
+    { m: 'post', p: '/completions' },
+    { m: 'post', p: '/completions' },
+    { m: 'post', p: '/completions' },
+    { m: 'post', p: '/completions/stream' },
+    { m: 'post', p: '/embeddings' },
+    { m: 'post', p: '/rerank' },
+    { m: 'get',  p: '/models' },
+    { m: 'get',  p: '/usage' },
+  ];
+  const keys = ['prodÂ·main', 'engÂ·alex', 'stagingÂ·default', 'ciÂ·gh-actions', 'adminÂ·root'];
+
+  function rand(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function rid() {
+    const s = 'abcdefghjkmnpqrstuvwxyz0123456789';
+    let o = 'req_';
+    for (let i = 0; i < 10; i++) o += s[Math.floor(Math.random() * s.length)];
+    return o;
+  }
+  function makeRow(secsAgo) {
+    const e = rand(endpoints);
+    // 97% are 2xx; 2% 4xx; 1% 5xx
+    const r = Math.random();
+    let status = 200, sCls = 's2';
+    if (r > 0.99) { status = 500; sCls = 's5'; }
+    else if (r > 0.97) { status = 429; sCls = 's4'; }
+    else if (r > 0.96) { status = 400; sCls = 's4'; }
+
+    let lat;
+    if (e.p === '/completions/stream') lat = 800 + Math.random() * 1800;
+    else if (e.p === '/embeddings')    lat = 50 + Math.random() * 120;
+    else if (e.p === '/rerank')        lat = 150 + Math.random() * 200;
+    else if (e.m === 'get')            lat = 8 + Math.random() * 30;
+    else                               lat = 300 + Math.random() * 600;
+    lat = Math.round(lat);
+    const latCls = lat < 200 ? 'fast' : lat < 800 ? 'med' : 'slow';
+
+    const tIn = Math.round(50 + Math.random() * 600);
+    const tOut = e.m === 'get' ? 0 : Math.round(20 + Math.random() * 200);
+    const cost = e.m === 'get' ? 0 : (tIn * 0.000002 + tOut * 0.00001);
+    const k = rand(keys);
+    return {
+      id: rid(),
+      time: secsAgo,
+      method: e.m, path: e.p,
+      status, sCls,
+      lat, latCls,
+      tIn, tOut,
+      cost,
+      key: k,
+    };
+  }
+
+  function fmtSecs(s) {
+    if (s < 60) return s + 's ago';
+    if (s < 3600) return Math.floor(s/60) + 'm ago';
+    return Math.floor(s/3600) + 'h ago';
+  }
+  function fmtCost(c) {
+    if (c === 0) return 'â€”';
+    return '$' + c.toFixed(c < 0.01 ? 4 : 3);
+  }
+  function rowHtml(r, fresh) {
+    return `
+      <tr class="${fresh ? 'fresh' : ''}" data-id="${r.id}">
+        <td><span class="status-pill ${r.sCls}">${r.status}</span></td>
+        <td><span class="method ${r.method}">${r.method.toUpperCase()}</span></td>
+        <td style="color:var(--fg-0)">${r.path}</td>
+        <td><span class="lat ${r.latCls}">${r.lat} ms</span></td>
+        <td>${r.tIn + r.tOut}</td>
+        <td>${r.key}</td>
+        <td>${fmtCost(r.cost)}</td>
+        <td style="color:var(--fg-2)">${fmtSecs(r.time)}</td>
+        <td style="color:var(--fg-3);font-size:10px;">${r.id.slice(4,10)}</td>
+      </tr>`;
+  }
+
+  const tbody = document.getElementById('logs-tbody');
+  // seed with 32 rows of historical data
+  let rows = [];
+  for (let i = 0; i < 32; i++) {
+    rows.push(makeRow(2 + i * 18 + Math.floor(Math.random() * 10)));
+  }
+  tbody.innerHTML = rows.map(r => rowHtml(r, false)).join('');
+
+  // live tail
+  let liveOn = true;
+  document.getElementById('live-toggle').addEventListener('click', e => {
+    liveOn = !liveOn;
+    e.currentTarget.style.opacity = liveOn ? '1' : '0.5';
+  });
+
+  setInterval(() => {
+    if (!liveOn) return;
+    const r = makeRow(0);
+    rows.unshift(r);
+    rows = rows.slice(0, 60);
+    const html = rowHtml(r, true);
+    tbody.insertAdjacentHTML('afterbegin', html);
+    // remove old
+    while (tbody.children.length > 60) tbody.removeChild(tbody.lastChild);
+  }, 1400);
+
+  // tick existing timestamps every 10s
+  setInterval(() => {
+    rows.forEach(r => r.time += 10);
+    document.querySelectorAll('#logs-tbody tr').forEach((tr, i) => {
+      const r = rows[i]; if (!r) return;
+      tr.children[7].textContent = fmtSecs(r.time);
+    });
+  }, 10000);
+
+  // row click â†’ select
+  tbody.addEventListener('click', e => {
+    const tr = e.target.closest('tr'); if (!tr) return;
+    tbody.querySelectorAll('tr.selected').forEach(x => x.classList.remove('selected'));
+    tr.classList.add('selected');
+  });
+
+  // animate rpm counter
+  const counter = document.getElementById('req-counter');
+  setInterval(() => {
+    const n = 1200 + Math.round(Math.random() * 80);
+    counter.textContent = n.toLocaleString('en-US');
+  }, 2000);
+</script>
+</body>
+</html>

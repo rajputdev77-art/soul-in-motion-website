@@ -19,3 +19,10 @@ npm-debug.log*
 # Node (in case anything is added later)
 node_modules/
 .claude/
+
+# Build artifacts (the ZIPs are regeneratable from downloads/zip-all.ps1)
+downloads/*.zip
+# Raw Claude Design ZIPs (the extracted source under design-source/<name>/ is what matters)
+design-source/*.zip
+design-source/logo/assets/
+design-source/logo/uploads/

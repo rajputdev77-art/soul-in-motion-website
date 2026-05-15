@@ -108,9 +108,23 @@ h1, h2, h3, h4 {
     font-size: 1.15rem;
     letter-spacing: -0.02em;
     color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    line-height: 1;
+}
+
+.logo-mark {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: block;
+    transition: transform 0.4s var(--ease);
 }
 
 .logo:hover { color: var(--accent); }
+.logo:hover .logo-mark { transform: rotate(-6deg) scale(1.05); }
+.logo-text { display: inline-block; }
 
 .nav-links {
     list-style: none;

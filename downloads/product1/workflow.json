@@ -1,0 +1,306 @@
+{
+  "name": "AI Content Automation Kit — Soul in Motion",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "f1a8c2e0-0001-4a01-9b00-000000000001",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "soul-in-motion-content-trigger",
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "src-blog-text-001",
+              "name": "blogText",
+              "value": "={{$json[\"message\"][\"text\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "src-chat-id-001",
+              "name": "chatId",
+              "value": "={{$json[\"message\"][\"chat\"][\"id\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1a8c2e0-0002-4a01-9b00-000000000002",
+      "name": "Extract Blog Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "claude-sonnet-4-6",
+        "messages": {
+          "values": [
+            {
+              "role": "user",
+              "content": "=You are a senior social media copywriter for a high-end personal brand. Rewrite the following blog post as a single Instagram caption.\n\nRules:\n- Hook in the first line that stops the scroll.\n- Maximum 150 words total.\n- Conversational, confident tone. No corporate fluff.\n- Use 2-3 line breaks between thought groups for readability.\n- End with a clear call to action (one short sentence).\n- Add 8-10 relevant hashtags on a new line at the very end.\n- Do NOT add any preamble like 'Here is your caption'. Output the caption only.\n\nBlog post:\n{{ $('Extract Blog Text').item.json.blogText }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokensToSample": 1500,
+          "temperature": 0.7
+        }
+      },
+      "id": "f1a8c2e0-0003-4a01-9b00-000000000003",
+      "name": "Claude — Instagram Caption",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        120
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "claude-sonnet-4-6",
+        "messages": {
+          "values": [
+            {
+              "role": "user",
+              "content": "=You are a LinkedIn ghostwriter for a founder who builds in public. Rewrite the following blog post as a LinkedIn post.\n\nRules:\n- First line is a strong hook that pulls the reader in.\n- Use short paragraphs of 1-3 lines each, with line breaks between them.\n- Maximum 220 words.\n- Sound human and direct. No emojis. No buzzwords like 'synergy', 'leverage', 'unlock'.\n- End with a one-line question that invites comments.\n- Do NOT add any preamble. Output the post only.\n\nBlog post:\n{{ $('Extract Blog Text').item.json.blogText }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokensToSample": 1500,
+          "temperature": 0.7
+        }
+      },
+      "id": "f1a8c2e0-0004-4a01-9b00-000000000004",
+      "name": "Claude — LinkedIn Post",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        300
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "claude-sonnet-4-6",
+        "messages": {
+          "values": [
+            {
+              "role": "user",
+              "content": "=You are a YouTube Shorts strategist. Read the following blog post and produce 5 distinct script ideas for YouTube Shorts (each under 60 seconds).\n\nFor each idea output:\n1. A scroll-stopping title (max 8 words).\n2. The exact opening hook line (1 sentence, spoken in the first 2 seconds).\n3. A 4-5 bullet shot list / talking points for the body.\n4. A clear closing call to action (1 sentence).\n\nFormat each idea with a numbered heading: 'Idea 1:', 'Idea 2:', etc. Add a blank line between ideas.\n\nDo NOT add any preamble. Output the 5 ideas only.\n\nBlog post:\n{{ $('Extract Blog Text').item.json.blogText }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokensToSample": 2000,
+          "temperature": 0.8
+        }
+      },
+      "id": "f1a8c2e0-0005-4a01-9b00-000000000005",
+      "name": "Claude — YouTube Shorts Ideas",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        480
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_ANTHROPIC_CREDENTIAL_ID",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Extract Blog Text').item.json.chatId }}",
+        "text": "=📸 INSTAGRAM CAPTION\n\n{{ $json.message.content }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "f1a8c2e0-0006-4a01-9b00-000000000006",
+      "name": "Telegram — Send Instagram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        120
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Extract Blog Text').item.json.chatId }}",
+        "text": "=💼 LINKEDIN POST\n\n{{ $json.message.content }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "f1a8c2e0-0007-4a01-9b00-000000000007",
+      "name": "Telegram — Send LinkedIn",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Extract Blog Text').item.json.chatId }}",
+        "text": "=🎬 5 YOUTUBE SHORTS IDEAS\n\n{{ $json.message.content }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "f1a8c2e0-0008-4a01-9b00-000000000008",
+      "name": "Telegram — Send YouTube",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        480
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_WITH_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Blog Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Blog Text": {
+      "main": [
+        [
+          {
+            "node": "Claude — Instagram Caption",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Claude — LinkedIn Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Claude — YouTube Shorts Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude — Instagram Caption": {
+      "main": [
+        [
+          {
+            "node": "Telegram — Send Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude — LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "Telegram — Send LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude — YouTube Shorts Ideas": {
+      "main": [
+        [
+          {
+            "node": "Telegram — Send YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "soul-in-motion-content-kit-v1",
+  "meta": {
+    "instanceId": "soul-in-motion",
+    "templateAuthor": "Dev Rajput — Soul in Motion",
+    "templateDescription": "Paste a blog post into Telegram. Receive an Instagram caption, a LinkedIn post, and 5 YouTube Shorts ideas in under 30 seconds. Powered by Anthropic Claude."
+  },
+  "tags": [
+    {
+      "name": "Soul in Motion",
+      "id": "soul-in-motion-tag"
+    },
+    {
+      "name": "Content Automation",
+      "id": "content-automation-tag"
+    }
+  ]
+}

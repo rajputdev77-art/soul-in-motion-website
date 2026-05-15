@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Kit — AI API Dashboard Template — Soul in Motion</title>
+    <meta name="description" content="Five hand-tuned screens (console, logs, empty, sign-in, pricing). Dark + light modes. Real interactivity. Static HTML + CSS, no deps.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header class="site-header" id="siteHeader">
+        <nav class="nav-container">
+            <a href="../index.html" class="logo" aria-label="Soul in Motion home">
+                <svg class="logo-mark" viewBox="0 0 220 220" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="nav-mobius-p7" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#E8A04A"/>
+                            <stop offset="100%" stop-color="#3D8FE0"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M 50 60 C 50 30, 110 30, 110 70 C 110 110, 50 110, 50 150 C 50 190, 110 190, 170 160 C 200 145, 200 110, 170 100 C 130 88, 90 110, 90 150" stroke="url(#nav-mobius-p7)" stroke-width="14" stroke-linecap="round" fill="none"/>
+                    <circle cx="135" cy="58" r="9" fill="#f0f0f0"/>
+                </svg>
+                <span class="logo-text">Soul in Motion</span>
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../index.html#products">Products</a></li>
+                <li><a href="../index.html#about">About</a></li>
+                <li><a href="../index.html#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="product-page">
+        <a href="../index.html" class="back-link">← Back to Home</a>
+
+        <section class="product-hero">
+            <p class="eyebrow">UI Kit · $49</p>
+            <h1>Console Kit — AI API Dashboard Template</h1>
+            <p class="product-tagline">An AI API console template that doesn't look like a Tailwind UI clone. Drop in your brand and ship by Friday.</p>
+        </section>
+
+        <section class="product-section">
+            <h2>What You Get</h2>
+            <ul>
+                <li><strong>5 fully-built screens:</strong> Console (KPIs + chart + API keys), Logs (live-tail inspector), Empty (day-0 onboarding), Sign-In (split layout), Pricing (3-tier with FAQ)</li>
+                <li>Hand-tuned dark <em>and</em> light modes with persistent theme toggle</li>
+                <li>Buyer-facing demo page (`index.html`) that links to every screen</li>
+                <li>Tokenized: every color/type/spacing variable in a single `tokens.css`</li>
+                <li>~100 inline lucide-style icons, no icon-font dependency</li>
+                <li>README, LICENSE, and the original PROMPT.md (use to extend)</li>
+                <li>Free upgrade to v1.1 (settings, team, webhooks) and v2.0 (Next.js port)</li>
+            </ul>
+        </section>
+
+        <section class="product-section">
+            <h2>Who This Is For</h2>
+            <ul>
+                <li>Founders shipping AI API products who need a Stripe-grade developer console</li>
+                <li>Solo developers who can ship the marketing site and the app from one template</li>
+                <li>Designers prototyping AI/dev tool UIs at high fidelity in hours, not weeks</li>
+            </ul>
+        </section>
+
+        <section class="product-section">
+            <h2>Tech Notes</h2>
+            <p>Static HTML + CSS + a sprinkle of vanilla JS. No build, no npm, no node_modules, no deps. Inter + JetBrains Mono via Google Fonts. CSS Grid, custom properties, `text-wrap: pretty`. Responsive down to 320px.</p>
+        </section>
+
+        <section class="purchase-box">
+            <div class="purchase-price">$49</div>
+            <p class="purchase-label">One-time payment · 14-day refund · unlimited projects</p>
+            <a href="https://rajputdev77.gumroad.com/l/kjeti" target="_blank" rel="noopener" class="btn btn-primary btn-large">Buy Now on Gumroad</a>
+            <p class="purchase-note">Delivered instantly via Gumroad. One-time payment. Free updates for v1.x.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p class="footer-brand">Soul in Motion © 2025 — Built by Dev Rajput</p>
+            <div class="socials">
+                <a href="https://www.instagram.com/soulmotion.studio" target="_blank" rel="noopener">Instagram</a>
+                <a href="https://rajputdev77.gumroad.com" target="_blank" rel="noopener">Gumroad</a>
+                <a href="#" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="#" target="_blank" rel="noopener">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1865 @@
+﻿<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>axon/api â€” console</title>
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  /* ---------------- Light theme override ----------------
+     The Jarvis system is dark-only. We add a light palette with the same
+     token names so every component flips together. HN/Stripe-leaning:
+     warm off-white base, near-black ink, hairline borders. */
+  :root[data-theme="light"] {
+    --bg-0: #F6F4EC;          /* page â€” warm off-white, HN-ish */
+    --bg-1: #FFFFFF;          /* card */
+    --bg-2: #F0EDE3;          /* hover, table head */
+    --bg-3: #E8E4D6;          /* pressed */
+    --bg-4: #FFFFFF;          /* popover */
+
+    --fg-0: #0A0E14;
+    --fg-1: #3D4654;
+    --fg-2: #6B7689;
+    --fg-3: #A8AEB8;
+
+    --border-1: #E2DECF;
+    --border-2: #CFC9B6;
+    --border-3: #B5AE99;
+
+    --profit:        #119D5E;
+    --profit-strong: #0E8853;
+    --profit-soft:   rgba(17, 157, 94, 0.10);
+    --profit-edge:   rgba(17, 157, 94, 0.30);
+
+    --loss:        #D6313F;
+    --loss-strong: #B82430;
+    --loss-soft:   rgba(214, 49, 63, 0.08);
+    --loss-edge:   rgba(214, 49, 63, 0.30);
+
+    --warn:      #B7791F;
+    --warn-soft: rgba(183, 121, 31, 0.10);
+    --warn-edge: rgba(183, 121, 31, 0.30);
+
+    --accent:        #2563EB;
+    --accent-strong: #1D4ED8;
+    --accent-soft:   rgba(37, 99, 235, 0.08);
+    --accent-edge:   rgba(37, 99, 235, 0.30);
+
+    --ring-focus: 0 0 0 2px rgba(37, 99, 235, 0.30);
+    --shadow-pop: 0 8px 24px rgba(15, 20, 30, 0.10), 0 2px 6px rgba(15, 20, 30, 0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg-0);
+    color: var(--fg-0);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    transition: background var(--t-med) var(--ease), color var(--t-med) var(--ease);
+  }
+  ::selection { background: var(--accent-soft); }
+
+  /* ============== TOP BAR ============== */
+  .topbar {
+    height: 52px;
+    border-bottom: 1px solid var(--border-1);
+    background: var(--bg-0);
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; cursor: default; }
+  .logo-mark {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    background: var(--fg-0);
+    color: var(--bg-0);
+    display: grid; place-items: center;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: 12px; letter-spacing: -0.02em;
+  }
+  .wordmark {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: -0.01em;
+    color: var(--fg-0);
+  }
+  .wordmark .slash { color: var(--fg-3); margin: 0 1px; }
+  .wordmark .sub { color: var(--fg-2); }
+
+  .org-switch {
+    margin-left: 4px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px 4px 10px;
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    background: var(--bg-1);
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-1);
+    cursor: pointer;
+    transition: border-color var(--t-base) var(--ease), background var(--t-base) var(--ease);
+  }
+  .org-switch:hover { border-color: var(--border-2); }
+  .org-switch .chev { color: var(--fg-3); display: inline-flex; }
+
+  .topnav { display: flex; gap: 2px; margin-left: 8px; }
+  .topnav a {
+    color: var(--fg-2);
+    font-size: 13px; font-weight: 500;
+    padding: 6px 10px; border-radius: var(--r-md);
+    text-decoration: none;
+    transition: color var(--t-base) var(--ease), background var(--t-base) var(--ease);
+  }
+  .topnav a:hover { color: var(--fg-0); }
+  .topnav a.active { color: var(--fg-0); background: var(--bg-2); }
+
+  .top-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  .env-switch {
+    display: inline-flex; gap: 0;
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    padding: 2px;
+  }
+  .env-switch button {
+    background: transparent; border: 0;
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 4px 9px;
+    color: var(--fg-2);
+    cursor: pointer;
+    border-radius: 5px;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color var(--t-base) var(--ease), background var(--t-base) var(--ease);
+  }
+  .env-switch button:hover { color: var(--fg-0); }
+  .env-switch button.active { color: var(--fg-0); background: var(--bg-3); }
+  .env-switch button .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--fg-3);
+  }
+  .env-switch button.active[data-env="live"] .dot { background: var(--profit); box-shadow: 0 0 0 0 var(--profit-edge); animation: pulse 2s var(--ease) infinite; }
+  .env-switch button.active[data-env="test"] .dot { background: var(--warn); }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 var(--profit-edge); }
+    50%     { box-shadow: 0 0 0 4px rgba(34,216,143,0); }
+  }
+
+  .search-trigger {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    padding: 4px 6px 4px 10px;
+    color: var(--fg-2);
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color var(--t-base) var(--ease);
+    min-width: 180px;
+  }
+  .search-trigger:hover { border-color: var(--border-2); }
+  .search-trigger .kbd {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--border-1);
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: var(--fg-2);
+  }
+
+  .icon-btn {
+    width: 30px; height: 30px;
+    display: inline-grid; place-items: center;
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    color: var(--fg-1);
+    cursor: pointer;
+    transition: border-color var(--t-base) var(--ease), color var(--t-base) var(--ease);
+  }
+  .icon-btn:hover { border-color: var(--border-2); color: var(--fg-0); }
+
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: white;
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 700;
+    border: 1px solid var(--border-1);
+  }
+
+  /* ============== TEST-MODE BANNER ============== */
+  .test-banner {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 24px;
+    background: var(--warn-soft);
+    border-bottom: 1px solid var(--warn-edge);
+    color: var(--warn); font-size: 11px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+  }
+  .test-banner b { font-weight: 700; }
+  .test-banner .sep { color: var(--warn); opacity: 0.4; margin: 0 6px; }
+  .test-banner.live { display: none; }
+
+  /* ============== PAGE LAYOUT ============== */
+  .page {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 28px 24px 96px;
+    display: grid;
+    gap: 24px;
+  }
+
+  .page-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; margin-bottom: -4px;
+  }
+  .page-head h1 {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--fg-0);
+  }
+  .page-head .crumbs {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-2);
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+  .page-head .crumbs .slash { color: var(--fg-3); margin: 0 6px; }
+  .page-head .crumbs .curr { color: var(--fg-1); }
+  .page-head-right {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-2);
+  }
+  .ticker-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--profit);
+    box-shadow: 0 0 0 0 var(--profit-edge);
+    animation: pulse 2s var(--ease) infinite;
+  }
+
+  /* ============== CARD PRIMITIVE ============== */
+  .card {
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-1);
+    gap: 12px;
+    min-height: 46px;
+  }
+  .card-head h3 {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-2);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .card-head h3 .count {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    color: var(--fg-3);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .card-body { padding: 18px; }
+  .card-flush { padding: 0; }
+
+  /* ============== KPI ROW ============== */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--bg-1);
+  }
+  .kpi {
+    padding: 18px 20px;
+    border-right: 1px solid var(--border-1);
+    display: flex; flex-direction: column; gap: 8px;
+    position: relative;
+  }
+  .kpi:last-child { border-right: 0; }
+  .kpi .lbl {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .kpi .val {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--fg-0);
+    font-feature-settings: "tnum" 1, "ss01" 1, "zero" 1;
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .kpi .val .unit {
+    font-size: 13px;
+    color: var(--fg-2);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .kpi .val .denom {
+    font-size: 13px;
+    color: var(--fg-2);
+    font-weight: 400;
+  }
+  .kpi .sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-2);
+    display: flex; align-items: center; gap: 4px;
+    margin-top: auto;
+  }
+  .kpi .sub .delta {
+    display: inline-flex; align-items: center; gap: 2px;
+    color: var(--profit);
+  }
+  .kpi .sub .delta.loss { color: var(--loss); }
+  .kpi .progress {
+    height: 4px;
+    background: var(--bg-2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 2px;
+    position: relative;
+  }
+  .kpi .progress .fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width var(--t-med) var(--ease);
+  }
+  .kpi .progress .fill.warn { background: var(--warn); }
+  .kpi .progress .limit {
+    position: absolute;
+    top: -2px; bottom: -2px;
+    width: 1px;
+    background: var(--fg-3);
+  }
+
+  @media (max-width: 1000px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .kpi:nth-child(2) { border-right: 0; }
+    .kpi:nth-child(1), .kpi:nth-child(2) { border-bottom: 1px solid var(--border-1); }
+  }
+  @media (max-width: 600px) {
+    .kpi-row { grid-template-columns: 1fr; }
+    .kpi { border-right: 0; border-bottom: 1px solid var(--border-1); }
+    .kpi:last-child { border-bottom: 0; }
+  }
+
+  /* ============== USAGE CHART + SIDEBAR ============== */
+  .row-usage {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 1100px) { .row-usage { grid-template-columns: 1fr; } }
+
+  .chart-wrap {
+    padding: 18px 18px 8px;
+  }
+  .chart-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .chart-legend {
+    display: flex; gap: 14px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-2);
+  }
+  .swatch {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 1px; margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .range-tabs {
+    display: inline-flex;
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    padding: 2px;
+  }
+  .range-tabs button {
+    background: transparent; border: 0;
+    color: var(--fg-2);
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 4px 9px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: color var(--t-base) var(--ease), background var(--t-base) var(--ease);
+  }
+  .range-tabs button:hover { color: var(--fg-0); }
+  .range-tabs button.active { background: var(--bg-3); color: var(--fg-0); }
+
+  .chart {
+    position: relative;
+    width: 100%; height: 220px;
+  }
+  .chart svg { width: 100%; height: 100%; display: block; }
+  .chart .gridline { stroke: var(--border-1); stroke-width: 1; }
+  .chart .yaxis text, .chart .xaxis text {
+    fill: var(--fg-2);
+    font-family: var(--font-mono);
+    font-size: 10px;
+  }
+  .chart .bar { fill: var(--accent); opacity: 0.85; transform-origin: bottom; animation: barIn 480ms var(--ease) both; }
+  .chart .bar.err { fill: var(--loss); }
+  .chart .bar.today { fill: var(--fg-0); opacity: 1; }
+  @keyframes barIn { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 0.85; } }
+  .crosshair-v { stroke: var(--fg-3); stroke-width: 1; stroke-dasharray: 2 2; }
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--bg-4);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-md);
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-0);
+    box-shadow: var(--shadow-pop);
+    min-width: 150px;
+    transform: translate(-50%, -110%);
+    transition: opacity var(--t-base) var(--ease);
+    opacity: 0;
+    z-index: 5;
+  }
+  .tooltip.on { opacity: 1; }
+  .tooltip .tt-row { display: flex; justify-content: space-between; gap: 12px; }
+  .tooltip .tt-label { color: var(--fg-2); }
+  .tooltip .tt-time { color: var(--fg-2); margin-bottom: 4px; }
+
+  /* ============== PLAN PANEL (right of chart) ============== */
+  .plan-card .card-body { padding: 0; }
+  .plan-row {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-1);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .plan-row:last-child { border-bottom: 0; }
+  .plan-row .k {
+    font-size: 11px;
+    color: var(--fg-2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .plan-row .v {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-0);
+    text-align: right;
+  }
+  .plan-row .v .muted { color: var(--fg-2); font-size: 11px; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px;
+    border-radius: var(--r-sm);
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    font-family: var(--font-mono);
+  }
+  .pill.live    { background: var(--profit-soft); color: var(--profit); border: 1px solid var(--profit-edge); }
+  .pill.test    { background: var(--warn-soft);   color: var(--warn);   border: 1px solid var(--warn-edge); }
+  .pill.ok      { background: var(--profit-soft); color: var(--profit); border: 1px solid var(--profit-edge); }
+  .pill.err     { background: var(--loss-soft);   color: var(--loss);   border: 1px solid var(--loss-edge); }
+  .pill.muted   { background: var(--bg-2);        color: var(--fg-1);   border: 1px solid var(--border-1); }
+  .pill.accent  { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-edge); }
+  .pill.read    { background: var(--bg-2);        color: var(--fg-1);   border: 1px solid var(--border-2); }
+  .pill.write   { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-edge); }
+  .pill.admin   { background: var(--loss-soft);   color: var(--loss);   border: 1px solid var(--loss-edge); }
+  .pill .ic { width: 10px; height: 10px; }
+
+  /* ============== KEYS TABLE ============== */
+  table.t {
+    width: 100%; border-collapse: collapse;
+    font-family: var(--font-ui); font-size: 13px;
+  }
+  table.t thead th {
+    text-align: left;
+    padding: 9px 18px;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-2);
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border-1);
+    white-space: nowrap;
+  }
+  table.t tbody td {
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--border-1);
+    color: var(--fg-1);
+    vertical-align: middle;
+  }
+  table.t tbody tr:last-child td { border-bottom: 0; }
+  table.t tbody tr:hover td { background: var(--bg-2); }
+  table.t .num {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum" 1;
+    color: var(--fg-0);
+    text-align: right;
+  }
+  table.t th.num { text-align: right; }
+
+  .key-name {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .key-name .name {
+    color: var(--fg-0);
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .key-name .by {
+    color: var(--fg-2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  .key-token {
+    display: inline-flex; align-items: center;
+    background: var(--bg-2);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-sm);
+    padding: 3px 6px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-0);
+    gap: 4px;
+  }
+  .key-token .prefix { color: var(--fg-2); }
+  .key-token .reveal {
+    color: var(--fg-3);
+    cursor: pointer;
+    padding: 0 2px;
+    display: inline-flex;
+    transition: color var(--t-base) var(--ease);
+  }
+  .key-token .reveal:hover { color: var(--fg-0); }
+  .key-token .copy {
+    color: var(--fg-3);
+    cursor: pointer;
+    padding: 0 2px;
+    display: inline-flex;
+    transition: color var(--t-base) var(--ease);
+  }
+  .key-token .copy:hover { color: var(--fg-0); }
+  .key-token .copied { color: var(--profit); }
+
+  .perm-stack { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .row-actions {
+    display: flex; gap: 4px;
+    justify-content: flex-end;
+  }
+  .row-actions button {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--r-sm);
+    width: 24px; height: 24px;
+    display: inline-grid; place-items: center;
+    color: var(--fg-2);
+    cursor: pointer;
+    transition: color var(--t-base) var(--ease), background var(--t-base) var(--ease), border-color var(--t-base) var(--ease);
+  }
+  .row-actions button:hover { color: var(--fg-0); border-color: var(--border-1); background: var(--bg-1); }
+  .row-actions button.danger:hover { color: var(--loss); border-color: var(--loss-edge); }
+
+  /* ============== BUTTONS ============== */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg-1);
+    color: var(--fg-0);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    padding: 6px 11px;
+    font-family: var(--font-ui); font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    transition: border-color var(--t-base) var(--ease), background var(--t-base) var(--ease);
+  }
+  .btn:hover { border-color: var(--border-2); background: var(--bg-2); }
+  .btn:active { transform: scale(0.98); }
+  .btn.primary {
+    background: var(--fg-0);
+    color: var(--bg-0);
+    border-color: var(--fg-0);
+  }
+  .btn.primary:hover { background: var(--fg-1); border-color: var(--fg-1); }
+  .btn .ic { width: 13px; height: 13px; }
+  .btn.sm { padding: 4px 8px; font-size: 11px; }
+
+  /* ============== DOCS PANEL ============== */
+  .docs-grid {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    min-height: 460px;
+  }
+  @media (max-width: 900px) { .docs-grid { grid-template-columns: 1fr; } }
+  .docs-side {
+    border-right: 1px solid var(--border-1);
+    padding: 14px 8px;
+    display: flex; flex-direction: column; gap: 1px;
+  }
+  .docs-side .group-label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-3);
+    padding: 8px 12px 4px;
+  }
+  .docs-side a {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--fg-1);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease);
+  }
+  .docs-side a:hover { background: var(--bg-2); color: var(--fg-0); }
+  .docs-side a.active { background: var(--bg-2); color: var(--fg-0); }
+  .docs-side a .method {
+    font-size: 9px; font-weight: 700;
+    color: var(--profit);
+    letter-spacing: 0.06em;
+  }
+  .docs-side a .method.post { color: var(--accent); }
+  .docs-side a .method.del { color: var(--loss); }
+
+  .docs-main { padding: 20px 22px; min-width: 0; }
+  .docs-main .endpoint-line {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 13px;
+    color: var(--fg-0);
+    margin-bottom: 4px;
+  }
+  .docs-main .endpoint-line .meth {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .docs-main .endpoint-line .meth.get { background: var(--profit-soft); color: var(--profit); }
+  .docs-main .endpoint-line .meth.del { background: var(--loss-soft); color: var(--loss); }
+  .docs-main h2 {
+    margin: 0 0 4px;
+    font-family: var(--font-ui);
+    font-size: 18px; font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg-0);
+  }
+  .docs-main .desc {
+    color: var(--fg-1);
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 6px 0 18px;
+    max-width: 640px;
+  }
+
+  .params-table {
+    width: 100%; border-collapse: collapse;
+    margin-bottom: 20px;
+    font-family: var(--font-mono); font-size: 12px;
+  }
+  .params-table th {
+    text-align: left;
+    font-family: var(--font-ui);
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-2);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-1);
+    background: transparent;
+  }
+  .params-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-1);
+    vertical-align: top;
+  }
+  .params-table tbody tr:last-child td { border-bottom: 0; }
+  .params-table .pname { color: var(--fg-0); }
+  .params-table .ptype { color: var(--accent); }
+  .params-table .preq { color: var(--loss); font-size: 10px; }
+  .params-table .pdesc { color: var(--fg-1); font-family: var(--font-ui); font-size: 13px; }
+
+  /* code block */
+  .code-block {
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-md);
+    background: var(--bg-0);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  :root[data-theme="light"] .code-block { background: #FCFAF2; }
+  .code-tabs {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border-1);
+    padding: 0 6px 0 6px;
+  }
+  .code-tabs-l { display: flex; }
+  .code-tabs button.tab {
+    background: transparent; border: 0;
+    padding: 8px 12px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-2);
+    cursor: pointer;
+    position: relative;
+    transition: color var(--t-base) var(--ease);
+  }
+  .code-tabs button.tab:hover { color: var(--fg-0); }
+  .code-tabs button.tab.active { color: var(--fg-0); }
+  .code-tabs button.tab.active::after {
+    content: ""; position: absolute;
+    left: 8px; right: 8px; bottom: -1px;
+    height: 1px; background: var(--fg-0);
+  }
+  .code-tabs .copy-btn {
+    background: transparent; border: 0;
+    color: var(--fg-2);
+    cursor: pointer;
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 6px 10px;
+    border-radius: var(--r-sm);
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color var(--t-base) var(--ease);
+  }
+  .code-tabs .copy-btn:hover { color: var(--fg-0); }
+  .code-tabs .copy-btn.copied { color: var(--profit); }
+
+  pre.code {
+    margin: 0;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--fg-0);
+    overflow-x: auto;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  pre.code .tok-c { color: var(--fg-3); }              /* comment */
+  pre.code .tok-k { color: var(--accent); }            /* keyword */
+  pre.code .tok-s { color: var(--profit); }            /* string */
+  pre.code .tok-n { color: var(--warn); }              /* number */
+  pre.code .tok-p { color: var(--fg-2); }              /* punctuation */
+  pre.code .tok-f { color: var(--fg-0); font-weight: 600; }   /* function */
+  pre.code .tok-v { color: var(--loss); }              /* curl flag */
+
+  .docs-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-1);
+    color: var(--fg-2);
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .docs-foot a { color: var(--accent); text-decoration: none; }
+  .docs-foot a:hover { text-decoration: underline; }
+
+  /* ============== BILLING ============== */
+  .row-billing {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 1100px) { .row-billing { grid-template-columns: 1fr; } }
+
+  .invoice-card .invoice-hero {
+    padding: 22px 22px 18px;
+    border-bottom: 1px solid var(--border-1);
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .invoice-hero .left { display: flex; flex-direction: column; gap: 6px; }
+  .invoice-hero .lbl {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-2);
+  }
+  .invoice-hero .amount {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 40px; line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--fg-0);
+    font-feature-settings: "tnum" 1, "ss01" 1, "zero" 1;
+  }
+  .invoice-hero .meta {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-2);
+  }
+  .invoice-hero .meta b { color: var(--fg-0); font-weight: 500; }
+  .invoice-hero .right {
+    display: flex; flex-direction: column; gap: 6px;
+    align-items: flex-end;
+    text-align: right;
+  }
+  .invoice-hero .right .row { display: flex; gap: 8px; align-items: center; }
+
+  /* projection bar */
+  .projection {
+    padding: 0 22px;
+    margin-top: 14px;
+  }
+  .projection-track {
+    position: relative;
+    height: 8px;
+    background: var(--bg-2);
+    border-radius: 2px;
+    overflow: visible;
+  }
+  .projection-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .projection-proj {
+    position: absolute; top: 0; bottom: 0;
+    background: var(--accent-soft);
+    border-left: 1px dashed var(--accent);
+  }
+  .projection-marker {
+    position: absolute; top: -4px; bottom: -4px;
+    width: 1px; background: var(--fg-3);
+  }
+  .projection-marker.budget { background: var(--warn); }
+  .projection-labels {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-2);
+    margin-top: 6px;
+  }
+
+  /* usage breakdown */
+  .breakdown {
+    padding: 18px 22px 22px;
+  }
+
+  .pm-card .pm-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-1);
+    gap: 12px;
+  }
+  .pm-card .pm-row:last-child { border-bottom: 0; }
+  .pm-card .card-card {
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .pm-card .card-card .brand-mark {
+    width: 32px; height: 22px;
+    background: linear-gradient(135deg, #1A1F2E 0%, #2F3B52 100%);
+    border-radius: 3px;
+    color: white;
+    display: grid; place-items: center;
+    font-family: var(--font-mono); font-size: 8px; font-weight: 700;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--border-1);
+  }
+  .pm-card .card-card .digits {
+    font-family: var(--font-mono); font-size: 13px;
+    color: var(--fg-0);
+  }
+  .pm-card .card-card .digits .dot {
+    color: var(--fg-3);
+    letter-spacing: 0.04em;
+  }
+  .pm-card .exp {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-2);
+  }
+
+  .next-invoice-card .next-invoice-body {
+    padding: 16px 18px;
+    display: grid; gap: 12px;
+  }
+  .ni-row {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 12px;
+  }
+  .ni-row .k { color: var(--fg-2); }
+  .ni-row .v { color: var(--fg-0); }
+  .ni-row.total {
+    padding-top: 10px;
+    border-top: 1px solid var(--border-1);
+  }
+  .ni-row.total .k { color: var(--fg-1); }
+  .ni-row.total .v { color: var(--fg-0); font-weight: 700; font-size: 14px; }
+
+  /* ============== FOOTER ============== */
+  .foot {
+    color: var(--fg-3);
+    font-family: var(--font-mono); font-size: 11px;
+    text-align: center;
+    padding: 32px 0 0;
+    letter-spacing: 0.02em;
+  }
+  .foot .sep { color: var(--fg-3); margin: 0 8px; }
+  .foot a { color: var(--fg-2); text-decoration: none; }
+  .foot a:hover { color: var(--fg-0); }
+
+  .ic { display: inline-block; vertical-align: -2px; flex-shrink: 0; }
+  a { color: inherit; }
+
+  /* ============== TWEAKS PANEL ANCHOR ============== */
+  /* Tweaks panel injected by tweaks-panel.jsx. Bottom-right by default. */
+</style>
+</head>
+<body>
+
+  <!-- ============== TOP BAR ============== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-mark">âŸ</div>
+      <div class="wordmark">axon<span class="slash">/</span><span class="sub">api</span></div>
+    </div>
+
+    <button class="org-switch">
+      <span>octogon-labs</span>
+      <span class="chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+    </button>
+
+    <nav class="topnav">
+      <a class="active" href="#">overview</a>
+      <a href="#">keys</a>
+      <a href="#">docs</a>
+      <a href="#">logs</a>
+      <a href="#">billing</a>
+      <a href="#">team</a>
+    </nav>
+
+    <div class="top-right">
+      <div class="env-switch" id="env-switch">
+        <button class="active" data-env="live"><span class="dot"></span>live</button>
+        <button data-env="test"><span class="dot"></span>test</button>
+      </div>
+
+      <button class="search-trigger">
+        <svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>search docs, keysâ€¦</span>
+        <span class="kbd">âŒ˜K</span>
+      </button>
+
+      <button class="icon-btn" id="theme-toggle" title="Toggle theme">
+        <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+
+      <button class="icon-btn" title="Notifications">
+        <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </button>
+
+      <div class="avatar">RN</div>
+    </div>
+  </header>
+
+  <!-- ============== TEST-MODE BANNER ============== -->
+  <div class="test-banner live" id="test-banner">
+    <svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+    <span><b>TEST MODE</b><span class="sep">Â·</span>requests use sandbox routing<span class="sep">Â·</span>no charges accrue<span class="sep">Â·</span>flip to <b>live</b> when you ship</span>
+  </div>
+
+  <!-- ============== PAGE ============== -->
+  <main class="page">
+
+    <!-- page head -->
+    <div class="page-head">
+      <div>
+        <div class="crumbs">octogon-labs<span class="slash">/</span>workspace<span class="slash">/</span><span class="curr">overview</span></div>
+        <h1>Console</h1>
+      </div>
+      <div class="page-head-right">
+        <span class="ticker-dot"></span>
+        <span>last request <b style="color:var(--fg-0)" id="last-req">312 ms</b> ago Â· region <b style="color:var(--fg-0)">iad-1</b> Â· build <b style="color:var(--fg-0)">v3.41.2</b></span>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="lbl">
+          <svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          Calls this period
+        </div>
+        <div class="val ds-num">2,847,213 <span class="denom">/ 5.0M</span></div>
+        <div class="progress" aria-hidden="true"><div class="fill" style="width:56.9%"></div></div>
+        <div class="sub"><span class="delta">+12.4%</span> vs last 14d Â· <span style="color:var(--fg-0)">2.15M</span> remaining</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">
+          <svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Cost accrued
+        </div>
+        <div class="val ds-num"><span class="unit">$</span>284.72</div>
+        <div class="progress" aria-hidden="true"><div class="fill" style="width:56.9%"></div><div class="limit" style="left:60%"></div></div>
+        <div class="sub">projected <span style="color:var(--fg-0)">$612.30</span> by May 31 Â· budget $500 <span style="color:var(--warn)">âš </span></div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">
+          <svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Burn rate
+        </div>
+        <div class="val ds-num"><span class="unit">$</span>20.34<span class="denom">/day</span></div>
+        <div class="progress" aria-hidden="true"><div class="fill" style="width:42%"></div></div>
+        <div class="sub"><span class="delta loss"><svg class="ic" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 7 17 17"/><polyline points="9 17 17 17 17 9"/></svg>+8.1%</span> 7d trailing Â· peak $34.10 (May 09)</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">
+          <svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Rate limit
+        </div>
+        <div class="val ds-num">1,243 <span class="denom">/ 10k rpm</span></div>
+        <div class="progress" aria-hidden="true"><div class="fill" style="width:12.4%"></div></div>
+        <div class="sub">p99 latency <span style="color:var(--fg-0)">412 ms</span> Â· err rate <span style="color:var(--profit)">0.03%</span></div>
+      </div>
+    </div>
+
+    <!-- USAGE CHART + PLAN -->
+    <section class="row-usage">
+      <div class="card chart-wrap">
+        <div class="chart-toolbar">
+          <div>
+            <h3 style="margin:0 0 4px;font-family:var(--font-ui);font-size:13px;font-weight:600;color:var(--fg-0);letter-spacing:-0.01em;">Requests per day</h3>
+            <div class="chart-legend">
+              <span><span class="swatch" style="background:var(--accent)"></span>2xx â€” succeeded</span>
+              <span><span class="swatch" style="background:var(--loss)"></span>4xx/5xx â€” errored</span>
+              <span style="color:var(--fg-3)">Â·</span>
+              <span>14d window</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="range-tabs">
+              <button>1D</button>
+              <button>7D</button>
+              <button class="active">14D</button>
+              <button>30D</button>
+              <button>90D</button>
+            </div>
+            <button class="btn sm">
+              <svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+              CSV
+            </button>
+          </div>
+        </div>
+        <div class="chart" id="chart">
+          <svg id="chart-svg" viewBox="0 0 800 220" preserveAspectRatio="none">
+            <g class="yaxis" id="yaxis"></g>
+            <g class="xaxis" id="xaxis"></g>
+            <g id="bars"></g>
+            <line class="crosshair-v" id="xhair" x1="0" x2="0" y1="20" y2="180" style="display:none"/>
+          </svg>
+          <div class="tooltip" id="tt">
+            <div class="tt-time" id="tt-time">May 14 Â· Tuesday</div>
+            <div class="tt-row"><span class="tt-label">total</span><span id="tt-total">214,820</span></div>
+            <div class="tt-row"><span class="tt-label">2xx</span><span id="tt-ok" style="color:var(--accent)">214,247</span></div>
+            <div class="tt-row"><span class="tt-label">err</span><span id="tt-err" style="color:var(--loss)">573</span></div>
+            <div class="tt-row"><span class="tt-label">cost</span><span id="tt-cost">$21.48</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan panel -->
+      <div class="card plan-card">
+        <div class="card-head">
+          <h3>Plan <span class="count">builder</span></h3>
+          <a href="#" style="font-family:var(--font-mono);font-size:11px;color:var(--accent);text-decoration:none;">manage â†’</a>
+        </div>
+        <div class="card-body">
+          <div class="plan-row">
+            <span class="k">Tier</span>
+            <span class="v">Builder<span class="muted"> Â· $0 base + usage</span></span>
+          </div>
+          <div class="plan-row">
+            <span class="k">Included</span>
+            <span class="v">5,000,000 req</span>
+          </div>
+          <div class="plan-row">
+            <span class="k">Overage</span>
+            <span class="v">$0.40<span class="muted"> / 1k req</span></span>
+          </div>
+          <div class="plan-row">
+            <span class="k">Period</span>
+            <span class="v">May 01 â†’ 31, 2026</span>
+          </div>
+          <div class="plan-row">
+            <span class="k">Renews</span>
+            <span class="v">in 17 days</span>
+          </div>
+          <div class="plan-row">
+            <span class="k">Budget alert</span>
+            <span class="v" style="color:var(--warn)">$500.00 âš </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- API KEYS -->
+    <div class="card">
+      <div class="card-head">
+        <h3>API keys <span class="count">5 active Â· 1 revoked</span></h3>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn sm">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="M3 12a9 9 0 1 0 9-9"/><polyline points="3 4 3 10 9 10"/></svg>
+            Rotate all
+          </button>
+          <button class="btn primary sm">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            New key
+          </button>
+        </div>
+      </div>
+      <div class="card-flush">
+        <table class="t">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Token</th>
+              <th>Env</th>
+              <th>Permissions</th>
+              <th class="num">Calls 24h</th>
+              <th>Last used</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="keys-tbody">
+            <tr data-key="axon_live_a1b2c3d4e5f6g7h8i9j0a3f2">
+              <td>
+                <div class="key-name">
+                  <span class="name">production Â· main</span>
+                  <span class="by">by alex.rouhani â€” node sdk v2.4.0</span>
+                </div>
+              </td>
+              <td>
+                <span class="key-token">
+                  <span class="prefix">axon_live_</span><span class="masked">â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢a3f2</span>
+                  <span class="reveal" title="Reveal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                  <span class="copy" title="Copy"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                </span>
+              </td>
+              <td><span class="pill live"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>live</span></td>
+              <td><div class="perm-stack"><span class="pill write">write</span><span class="pill read">read</span></div></td>
+              <td class="num">1,243,802</td>
+              <td><span class="ds-mono" style="color:var(--profit);font-size:12px;">4s ago</span></td>
+              <td><span class="ds-mono" style="font-size:12px;color:var(--fg-1)">2026-04-12</span></td>
+              <td>
+                <div class="row-actions">
+                  <button title="Rotate"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><polyline points="3 4 3 10 9 10"/></svg></button>
+                  <button title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                  <button class="danger" title="Revoke"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr data-key="axon_live_z9y8x7w6v5u4t3s2r1q09d7a">
+              <td>
+                <div class="key-name">
+                  <span class="name">eng Â· alex (read-only)</span>
+                  <span class="by">by alex.rouhani â€” cli</span>
+                </div>
+              </td>
+              <td>
+                <span class="key-token">
+                  <span class="prefix">axon_live_</span><span class="masked">â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢9d7a</span>
+                  <span class="reveal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                  <span class="copy"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                </span>
+              </td>
+              <td><span class="pill live"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>live</span></td>
+              <td><div class="perm-stack"><span class="pill read">read</span></div></td>
+              <td class="num">42,108</td>
+              <td><span class="ds-mono" style="color:var(--fg-1);font-size:12px;">14 days ago</span></td>
+              <td><span class="ds-mono" style="font-size:12px;color:var(--fg-1)">2026-01-03</span></td>
+              <td>
+                <div class="row-actions">
+                  <button title="Rotate"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><polyline points="3 4 3 10 9 10"/></svg></button>
+                  <button title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                  <button class="danger" title="Revoke"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr data-key="axon_test_qq0011223344556677888c4e">
+              <td>
+                <div class="key-name">
+                  <span class="name">staging Â· default</span>
+                  <span class="by">by maya.lin â€” terraform</span>
+                </div>
+              </td>
+              <td>
+                <span class="key-token">
+                  <span class="prefix">axon_test_</span><span class="masked">â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢8c4e</span>
+                  <span class="reveal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                  <span class="copy"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                </span>
+              </td>
+              <td><span class="pill test"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>test</span></td>
+              <td><div class="perm-stack"><span class="pill write">write</span><span class="pill read">read</span></div></td>
+              <td class="num">8,420</td>
+              <td><span class="ds-mono" style="color:var(--fg-1);font-size:12px;">2 min ago</span></td>
+              <td><span class="ds-mono" style="font-size:12px;color:var(--fg-1)">2026-03-28</span></td>
+              <td>
+                <div class="row-actions">
+                  <button title="Rotate"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><polyline points="3 4 3 10 9 10"/></svg></button>
+                  <button title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                  <button class="danger" title="Revoke"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr data-key="axon_test_ci22334455667788990012f01">
+              <td>
+                <div class="key-name">
+                  <span class="name">ci Â· github-actions</span>
+                  <span class="by">by service-account â€” automation</span>
+                </div>
+              </td>
+              <td>
+                <span class="key-token">
+                  <span class="prefix">axon_test_</span><span class="masked">â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢2f01</span>
+                  <span class="reveal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                  <span class="copy"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                </span>
+              </td>
+              <td><span class="pill test"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>test</span></td>
+              <td><div class="perm-stack"><span class="pill read">read</span></div></td>
+              <td class="num">2,104</td>
+              <td><span class="ds-mono" style="color:var(--fg-1);font-size:12px;">1 hr ago</span></td>
+              <td><span class="ds-mono" style="font-size:12px;color:var(--fg-1)">2026-02-14</span></td>
+              <td>
+                <div class="row-actions">
+                  <button title="Rotate"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><polyline points="3 4 3 10 9 10"/></svg></button>
+                  <button title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                  <button class="danger" title="Revoke"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr data-key="axon_live_admin_aaaa1111bbbb2222cccc3333">
+              <td>
+                <div class="key-name">
+                  <span class="name">admin Â· root</span>
+                  <span class="by">by alex.rouhani â€” restricted to 2 IPs</span>
+                </div>
+              </td>
+              <td>
+                <span class="key-token">
+                  <span class="prefix">axon_live_</span><span class="masked">â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢3333</span>
+                  <span class="reveal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+                  <span class="copy"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                </span>
+              </td>
+              <td><span class="pill live"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>live</span></td>
+              <td><div class="perm-stack"><span class="pill admin">admin</span></div></td>
+              <td class="num">186</td>
+              <td><span class="ds-mono" style="color:var(--fg-1);font-size:12px;">3 hr ago</span></td>
+              <td><span class="ds-mono" style="font-size:12px;color:var(--fg-1)">2025-11-22</span></td>
+              <td>
+                <div class="row-actions">
+                  <button title="Rotate"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9"/><polyline points="3 4 3 10 9 10"/></svg></button>
+                  <button title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                  <button class="danger" title="Revoke"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DOCS PANEL -->
+    <div class="card">
+      <div class="card-head">
+        <h3>Endpoints <span class="count">v2 Â· openapi 3.1</span></h3>
+        <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--fg-2);">
+          <span>base url</span>
+          <span class="key-token" style="cursor:default;"><span style="color:var(--fg-0)">https://api.axon.run/v2</span></span>
+        </div>
+      </div>
+      <div class="docs-grid">
+        <aside class="docs-side">
+          <div class="group-label">Inference</div>
+          <a class="active" data-ep="completions"><span><span class="method post">POST</span> /completions</span></a>
+          <a data-ep="completions-stream"><span><span class="method post">POST</span> /completions/stream</span></a>
+          <a data-ep="embeddings"><span><span class="method post">POST</span> /embeddings</span></a>
+          <a data-ep="rerank"><span><span class="method post">POST</span> /rerank</span></a>
+
+          <div class="group-label">Models</div>
+          <a data-ep="models-list"><span><span class="method">GET</span> /models</span></a>
+          <a data-ep="models-get"><span><span class="method">GET</span> /models/:id</span></a>
+
+          <div class="group-label">Keys &amp; usage</div>
+          <a data-ep="keys-list"><span><span class="method">GET</span> /keys</span></a>
+          <a data-ep="usage"><span><span class="method">GET</span> /usage</span></a>
+          <a data-ep="keys-revoke"><span><span class="method del">DEL</span> /keys/:id</span></a>
+        </aside>
+
+        <div class="docs-main">
+          <div class="endpoint-line"><span class="meth">POST</span><span>https://api.axon.run/v2/completions</span></div>
+          <h2>Create a completion</h2>
+          <p class="desc">Send a prompt to a model and receive a single non-streaming response. Returns the full token sequence and a usage object you can charge back. Use <span style="color:var(--accent);font-family:var(--font-mono);">/completions/stream</span> for token-level streaming over SSE.</p>
+
+          <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-2);">Body</span>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--fg-3)">application/json</span>
+          </div>
+          <table class="params-table">
+            <thead>
+              <tr><th style="width:160px">Field</th><th style="width:120px">Type</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="pname">model</span> <span class="preq">required</span></td>
+                <td><span class="ptype">string</span></td>
+                <td class="pdesc">Model id, e.g. <code style="font-family:var(--font-mono);color:var(--fg-0);background:var(--bg-2);padding:1px 5px;border-radius:3px;">axon-mini-v3</code>. List options via <code style="font-family:var(--font-mono);color:var(--fg-0);background:var(--bg-2);padding:1px 5px;border-radius:3px;">GET /models</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="pname">prompt</span> <span class="preq">required</span></td>
+                <td><span class="ptype">string</span></td>
+                <td class="pdesc">Input text. Max 128k tokens (model-dependent). UTF-8 only.</td>
+              </tr>
+              <tr>
+                <td><span class="pname">max_tokens</span></td>
+                <td><span class="ptype">integer</span></td>
+                <td class="pdesc">Hard cap on completion length. Defaults to 1024.</td>
+              </tr>
+              <tr>
+                <td><span class="pname">temperature</span></td>
+                <td><span class="ptype">float</span></td>
+                <td class="pdesc">Sampling temperature, <span style="font-family:var(--font-mono)">0.0 â€“ 2.0</span>. Defaults to 0.7.</td>
+              </tr>
+              <tr>
+                <td><span class="pname">stop</span></td>
+                <td><span class="ptype">string[]</span></td>
+                <td class="pdesc">Up to 4 stop sequences. The model halts before emitting any of these.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="code-block">
+            <div class="code-tabs">
+              <div class="code-tabs-l" id="req-tabs">
+                <button class="tab active" data-tab="curl">curl</button>
+                <button class="tab" data-tab="node">node</button>
+                <button class="tab" data-tab="python">python</button>
+                <button class="tab" data-tab="go">go</button>
+              </div>
+              <button class="copy-btn" id="copy-req">
+                <svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>copy</span>
+              </button>
+            </div>
+<pre class="code" id="req-curl"><span class="tok-c"># request â€” bash + curl</span>
+curl https://api.axon.run/v2/completions <span class="tok-p">\</span>
+  <span class="tok-v">-H</span> <span class="tok-s">"Authorization: Bearer $AXON_KEY"</span> <span class="tok-p">\</span>
+  <span class="tok-v">-H</span> <span class="tok-s">"Content-Type: application/json"</span> <span class="tok-p">\</span>
+  <span class="tok-v">-d</span> <span class="tok-s">'{
+    "model": "axon-mini-v3",
+    "prompt": "summarise the changelog below in 3 bullets:\n\n",
+    "max_tokens": 256,
+    "temperature": 0.4,
+    "stop": ["\n\n"]
+  }'</span></pre>
+<pre class="code" id="req-node" style="display:none"><span class="tok-c">// request â€” node sdk v2.4</span>
+<span class="tok-k">import</span> Axon <span class="tok-k">from</span> <span class="tok-s">"@axon/api"</span><span class="tok-p">;</span>
+
+<span class="tok-k">const</span> client <span class="tok-p">=</span> <span class="tok-k">new</span> <span class="tok-f">Axon</span>({ apiKey: process.env.AXON_KEY })<span class="tok-p">;</span>
+
+<span class="tok-k">const</span> res <span class="tok-p">=</span> <span class="tok-k">await</span> client.completions.<span class="tok-f">create</span>({
+  model<span class="tok-p">:</span> <span class="tok-s">"axon-mini-v3"</span>,
+  prompt<span class="tok-p">:</span> <span class="tok-s">"summarise the changelog below in 3 bullets:\n\n"</span>,
+  max_tokens<span class="tok-p">:</span> <span class="tok-n">256</span>,
+  temperature<span class="tok-p">:</span> <span class="tok-n">0.4</span>,
+  stop<span class="tok-p">:</span> [<span class="tok-s">"\n\n"</span>],
+})<span class="tok-p">;</span>
+
+console.<span class="tok-f">log</span>(res.choices[<span class="tok-n">0</span>].text)<span class="tok-p">;</span></pre>
+<pre class="code" id="req-python" style="display:none"><span class="tok-c"># request â€” python sdk v2.4</span>
+<span class="tok-k">from</span> axon <span class="tok-k">import</span> Axon
+
+client <span class="tok-p">=</span> <span class="tok-f">Axon</span>(api_key<span class="tok-p">=</span>os.environ[<span class="tok-s">"AXON_KEY"</span>])
+
+res <span class="tok-p">=</span> client.completions.<span class="tok-f">create</span>(
+    model<span class="tok-p">=</span><span class="tok-s">"axon-mini-v3"</span>,
+    prompt<span class="tok-p">=</span><span class="tok-s">"summarise the changelog below in 3 bullets:\n\n"</span>,
+    max_tokens<span class="tok-p">=</span><span class="tok-n">256</span>,
+    temperature<span class="tok-p">=</span><span class="tok-n">0.4</span>,
+    stop<span class="tok-p">=</span>[<span class="tok-s">"\n\n"</span>],
+)
+
+<span class="tok-f">print</span>(res.choices[<span class="tok-n">0</span>].text)</pre>
+<pre class="code" id="req-go" style="display:none"><span class="tok-c">// request â€” go sdk v2.4</span>
+<span class="tok-k">import</span> <span class="tok-s">"github.com/axon/axon-go/v2"</span>
+
+client <span class="tok-p">:=</span> axon.<span class="tok-f">NewClient</span>(os.<span class="tok-f">Getenv</span>(<span class="tok-s">"AXON_KEY"</span>))
+
+res<span class="tok-p">,</span> err <span class="tok-p">:=</span> client.Completions.<span class="tok-f">Create</span>(ctx<span class="tok-p">,</span> &amp;axon.CompletionRequest{
+    Model<span class="tok-p">:</span>       <span class="tok-s">"axon-mini-v3"</span><span class="tok-p">,</span>
+    Prompt<span class="tok-p">:</span>      <span class="tok-s">"summarise the changelog below in 3 bullets:\n\n"</span><span class="tok-p">,</span>
+    MaxTokens<span class="tok-p">:</span>   <span class="tok-n">256</span><span class="tok-p">,</span>
+    Temperature<span class="tok-p">:</span> <span class="tok-n">0.4</span><span class="tok-p">,</span>
+})</pre>
+          </div>
+
+          <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-2);">Response</span>
+            <span class="pill ok">200 OK</span>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--fg-3);margin-left:auto;">avg 412 ms Â· p99 1.2 s</span>
+          </div>
+          <div class="code-block">
+            <div class="code-tabs">
+              <div class="code-tabs-l">
+                <button class="tab active">body</button>
+                <button class="tab">headers</button>
+              </div>
+              <button class="copy-btn" id="copy-res">
+                <svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>copy</span>
+              </button>
+            </div>
+<pre class="code">{
+  <span class="tok-s">"id"</span><span class="tok-p">:</span> <span class="tok-s">"cmpl_8GFp2c1qZ"</span><span class="tok-p">,</span>
+  <span class="tok-s">"object"</span><span class="tok-p">:</span> <span class="tok-s">"completion"</span><span class="tok-p">,</span>
+  <span class="tok-s">"created"</span><span class="tok-p">:</span> <span class="tok-n">1747234803</span><span class="tok-p">,</span>
+  <span class="tok-s">"model"</span><span class="tok-p">:</span> <span class="tok-s">"axon-mini-v3"</span><span class="tok-p">,</span>
+  <span class="tok-s">"choices"</span><span class="tok-p">:</span> [
+    {
+      <span class="tok-s">"index"</span><span class="tok-p">:</span> <span class="tok-n">0</span><span class="tok-p">,</span>
+      <span class="tok-s">"text"</span><span class="tok-p">:</span> <span class="tok-s">"- adds /completions/stream over SSE\n- raises max_tokens cap to 128k\n- deprecates `top_k` (removal in v3)"</span><span class="tok-p">,</span>
+      <span class="tok-s">"finish_reason"</span><span class="tok-p">:</span> <span class="tok-s">"stop"</span>
+    }
+  ]<span class="tok-p">,</span>
+  <span class="tok-s">"usage"</span><span class="tok-p">:</span> {
+    <span class="tok-s">"prompt_tokens"</span><span class="tok-p">:</span> <span class="tok-n">412</span><span class="tok-p">,</span>
+    <span class="tok-s">"completion_tokens"</span><span class="tok-p">:</span> <span class="tok-n">68</span><span class="tok-p">,</span>
+    <span class="tok-s">"total_tokens"</span><span class="tok-p">:</span> <span class="tok-n">480</span><span class="tok-p">,</span>
+    <span class="tok-s">"cost_usd"</span><span class="tok-p">:</span> <span class="tok-n">0.00192</span>
+  }
+}</pre>
+          </div>
+
+          <div class="docs-foot">
+            <span>Errors: <span class="pill err">400</span> <span class="pill err">401</span> <span class="pill err">429</span> <span class="pill err">500</span></span>
+            <span><a href="#">full reference â†’</a> <span style="color:var(--fg-3);margin:0 8px;">Â·</span> <a href="#">changelog â†—</a> <span style="color:var(--fg-3);margin:0 8px;">Â·</span> <a href="#">openapi.yaml</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BILLING -->
+    <section class="row-billing">
+      <div class="card invoice-card">
+        <div class="card-head">
+          <h3>Billing summary <span class="count">may 2026</span></h3>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button class="btn sm">
+              <svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Past invoices
+            </button>
+            <button class="btn sm">
+              <svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+              Download
+            </button>
+          </div>
+        </div>
+
+        <div class="invoice-hero">
+          <div class="left">
+            <div class="lbl">Open balance Â· period to date</div>
+            <div class="amount ds-num">$284.72</div>
+            <div class="meta">2,847,213 requests Â· <b>$0.40</b> per 1k overage Â· <b>17</b> days remaining</div>
+          </div>
+          <div class="right">
+            <div class="row"><span class="pill ok">on track</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--fg-2)">no overage yet</span></div>
+            <div style="font-family:var(--font-mono);font-size:11px;color:var(--fg-2)">projected total <span style="color:var(--fg-0)">$612.30</span></div>
+          </div>
+        </div>
+
+        <div class="projection">
+          <div class="projection-track">
+            <div class="projection-fill" style="width:42%;"></div>
+            <div class="projection-proj" style="left:42%; width:48%; height:100%;"></div>
+            <div class="projection-marker budget" style="left:80%;" title="Budget $500"></div>
+          </div>
+          <div class="projection-labels">
+            <span>May 01 Â· $0</span>
+            <span style="color:var(--fg-1)">today Â· $284.72</span>
+            <span style="color:var(--warn)">budget Â· $500</span>
+            <span>May 31 Â· proj $612.30</span>
+          </div>
+        </div>
+
+        <div class="breakdown">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-2);">Usage breakdown</span>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--fg-3);">by endpoint Â· current period</span>
+          </div>
+          <table class="t" style="font-size:13px;">
+            <thead>
+              <tr>
+                <th>Endpoint</th>
+                <th class="num">Calls</th>
+                <th class="num">Avg latency</th>
+                <th class="num">Errors</th>
+                <th class="num">Cost</th>
+                <th class="num">% total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span style="font-family:var(--font-mono);color:var(--fg-0);font-size:12px;"><span class="pill accent" style="margin-right:6px;">POST</span>/completions</span></td>
+                <td class="num">1,842,019</td>
+                <td class="num">412 ms</td>
+                <td class="num"><span style="color:var(--profit)">512</span></td>
+                <td class="num">$184.20</td>
+                <td class="num"><span style="color:var(--fg-1)">64.7%</span></td>
+              </tr>
+              <tr>
+                <td><span style="font-family:var(--font-mono);color:var(--fg-0);font-size:12px;"><span class="pill accent" style="margin-right:6px;">POST</span>/embeddings</span></td>
+                <td class="num">812,344</td>
+                <td class="num">88 ms</td>
+                <td class="num"><span style="color:var(--profit)">14</span></td>
+                <td class="num">$48.74</td>
+                <td class="num"><span style="color:var(--fg-1)">17.1%</span></td>
+              </tr>
+              <tr>
+                <td><span style="font-family:var(--font-mono);color:var(--fg-0);font-size:12px;"><span class="pill accent" style="margin-right:6px;">POST</span>/rerank</span></td>
+                <td class="num">142,108</td>
+                <td class="num">204 ms</td>
+                <td class="num"><span style="color:var(--loss)">47</span></td>
+                <td class="num">$28.42</td>
+                <td class="num"><span style="color:var(--fg-1)">10.0%</span></td>
+              </tr>
+              <tr>
+                <td><span style="font-family:var(--font-mono);color:var(--fg-0);font-size:12px;"><span class="pill accent" style="margin-right:6px;">POST</span>/completions/stream</span></td>
+                <td class="num">48,210</td>
+                <td class="num">1.42 s</td>
+                <td class="num"><span style="color:var(--profit)">0</span></td>
+                <td class="num">$19.28</td>
+                <td class="num"><span style="color:var(--fg-1)">6.8%</span></td>
+              </tr>
+              <tr>
+                <td><span style="font-family:var(--font-mono);color:var(--fg-0);font-size:12px;"><span class="pill muted" style="margin-right:6px;">GET</span>/models Â· /usage Â· /keys</span></td>
+                <td class="num">2,532</td>
+                <td class="num">12 ms</td>
+                <td class="num"><span style="color:var(--profit)">0</span></td>
+                <td class="num">$4.08</td>
+                <td class="num"><span style="color:var(--fg-1)">1.4%</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div class="card pm-card">
+          <div class="card-head">
+            <h3>Payment method</h3>
+            <a href="#" style="font-family:var(--font-mono);font-size:11px;color:var(--accent);text-decoration:none;">change â†’</a>
+          </div>
+          <div class="pm-row">
+            <div class="card-card">
+              <span class="brand-mark">VISA</span>
+              <span class="digits"><span class="dot">â€¢â€¢â€¢â€¢</span> <span class="dot">â€¢â€¢â€¢â€¢</span> <span class="dot">â€¢â€¢â€¢â€¢</span> 4242</span>
+            </div>
+            <span class="exp">exp 09/27</span>
+          </div>
+          <div class="pm-row">
+            <div style="font-family:var(--font-mono);font-size:12px;color:var(--fg-1);">billed to</div>
+            <div style="font-family:var(--font-mono);font-size:12px;color:var(--fg-0);text-align:right;">octogon-labs, inc.<br><span style="color:var(--fg-2);">finance@octogon.dev</span></div>
+          </div>
+        </div>
+
+        <div class="card next-invoice-card">
+          <div class="card-head">
+            <h3>Next invoice <span class="count">jun 01</span></h3>
+          </div>
+          <div class="next-invoice-body">
+            <div class="ni-row"><span class="k">Builder plan</span><span class="v">$0.00</span></div>
+            <div class="ni-row"><span class="k">Included calls</span><span class="v">5,000,000 Â· free</span></div>
+            <div class="ni-row"><span class="k">Overage</span><span class="v" style="color:var(--fg-3)">â€” (projected)</span></div>
+            <div class="ni-row"><span class="k">SLA support</span><span class="v">$49.00</span></div>
+            <div class="ni-row"><span class="k">Sub-total</span><span class="v">$49.00</span></div>
+            <div class="ni-row"><span class="k">Tax (CA, 8.875%)</span><span class="v">$4.35</span></div>
+            <div class="ni-row total"><span class="k">Total due Jun 01</span><span class="v">$53.35</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Webhook</h3>
+            <span class="pill ok" style="font-family:var(--font-mono);">live</span>
+          </div>
+          <div style="padding:14px 18px;display:flex;flex-direction:column;gap:8px;">
+            <div style="font-family:var(--font-mono);font-size:12px;color:var(--fg-0);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">https://octogon.dev/hooks/axon</div>
+            <div style="font-family:var(--font-mono);font-size:11px;color:var(--fg-2);">last delivery <span style="color:var(--profit)">200 OK</span> Â· 2 min ago Â· 248 in 24h</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- footer -->
+    <div class="foot">
+      <span>axon/api v3.41.2</span><span class="sep">Â·</span>
+      <a href="#">status</a><span class="sep">Â·</span>
+      <a href="#">changelog</a><span class="sep">Â·</span>
+      <a href="#">support</a><span class="sep">Â·</span>
+      <span>region iad-1</span><span class="sep">Â·</span>
+      <span id="foot-clock">14:00:03 UTC</span>
+    </div>
+  </main>
+
+<script>
+  // ---------------------- theme toggle ----------------------
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('theme-toggle');
+  const moonIcon = themeBtn.querySelector('.theme-icon-light');
+  const sunIcon  = themeBtn.querySelector('.theme-icon-dark');
+
+  function setTheme(t) {
+    root.setAttribute('data-theme', t);
+    try { localStorage.setItem('axon_theme', t); } catch(e){}
+    if (t === 'dark') { moonIcon.style.display = 'none'; sunIcon.style.display = ''; }
+    else              { moonIcon.style.display = '';     sunIcon.style.display  = 'none'; }
+  }
+  try {
+    const stored = localStorage.getItem('axon_theme');
+    if (stored) setTheme(stored);
+  } catch(e){}
+  themeBtn.addEventListener('click', () => {
+    setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+  // ---------------------- env switch ----------------------
+  const envSwitch = document.getElementById('env-switch');
+  const banner = document.getElementById('test-banner');
+  envSwitch.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    envSwitch.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    if (b.dataset.env === 'test') banner.classList.remove('live');
+    else banner.classList.add('live');
+  });
+
+  // ---------------------- reveal + copy keys ----------------------
+  document.querySelectorAll('#keys-tbody tr').forEach(tr => {
+    const fullKey = tr.dataset.key;
+    const masked = tr.querySelector('.masked');
+    const reveal = tr.querySelector('.reveal');
+    const copy = tr.querySelector('.copy');
+    const prefix = tr.querySelector('.prefix');
+    const last4 = fullKey.slice(-4);
+    const fullSuffix = fullKey.replace(/^sk_(live|test)_/, '');
+    let shown = false;
+    reveal.addEventListener('click', () => {
+      shown = !shown;
+      masked.textContent = shown ? fullSuffix : ('â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' + last4);
+    });
+    copy.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(fullKey); } catch(e){}
+      const orig = copy.innerHTML;
+      copy.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      copy.classList.add('copied');
+      setTimeout(() => { copy.innerHTML = orig; copy.classList.remove('copied'); }, 1100);
+    });
+  });
+
+  // ---------------------- range tabs (visual only) ----------------------
+  document.querySelectorAll('.range-tabs').forEach(seg => {
+    seg.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      seg.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+
+  // ---------------------- docs sidebar selection (visual only) ----------------------
+  document.querySelectorAll('.docs-side a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.docs-side a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+
+  // ---------------------- code tabs (request body) ----------------------
+  document.getElementById('req-tabs').addEventListener('click', e => {
+    const b = e.target.closest('button.tab'); if (!b) return;
+    const tab = b.dataset.tab;
+    document.querySelectorAll('#req-tabs .tab').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    ['curl','node','python','go'].forEach(t => {
+      const el = document.getElementById('req-' + t);
+      if (el) el.style.display = (t === tab) ? '' : 'none';
+    });
+  });
+  // simple "copy" affordance â€” visual feedback only
+  function attachCopyFlash(btnId) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      btn.classList.add('copied');
+      const label = btn.querySelector('span');
+      const orig = label.textContent;
+      label.textContent = 'copied';
+      setTimeout(() => { btn.classList.remove('copied'); label.textContent = orig; }, 1100);
+    });
+  }
+  attachCopyFlash('copy-req');
+  attachCopyFlash('copy-res');
+
+  // ---------------------- usage chart ----------------------
+  const W = 800, H = 220, padL = 36, padR = 12, padT = 18, padB = 38;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const N = 14;
+  // synthesize 14 days of request counts
+  const rng = (i) => Math.sin(i*1.7)*0.5 + Math.sin(i*0.31)*0.7 + Math.cos(i*0.9)*0.4;
+  const days = [];
+  for (let i = 0; i < N; i++) {
+    const base = 170000 + rng(i) * 30000 + i * 2200;
+    const errPct = 0.0015 + Math.abs(Math.sin(i*0.7)) * 0.002 + (i === 9 ? 0.012 : 0); // spike on May 09
+    const total = Math.round(base);
+    const err = Math.round(total * errPct);
+    days.push({ total, err, ok: total - err });
+  }
+  const maxV = Math.max(...days.map(d => d.total));
+  const yMax = Math.ceil(maxV / 50000) * 50000;
+  const colW = innerW / N;
+  const barW = colW * 0.62;
+
+  // y axis
+  const yaxis = document.getElementById('yaxis');
+  const ticks = [0, 0.25, 0.5, 0.75, 1.0];
+  let yHtml = '';
+  ticks.forEach(t => {
+    const yPos = padT + (1 - t) * innerH;
+    const v = Math.round(yMax * t);
+    const lbl = v >= 1000 ? (v/1000).toFixed(0) + 'k' : v;
+    yHtml += `<line class="gridline" x1="${padL}" x2="${W-padR}" y1="${yPos}" y2="${yPos}"/>`;
+    yHtml += `<text x="${padL-6}" y="${yPos+3}" text-anchor="end">${lbl}</text>`;
+  });
+  yaxis.innerHTML = yHtml;
+
+  // bars
+  const bars = document.getElementById('bars');
+  let bHtml = '';
+  const dayLabels = ['May 01','02','03','04','05','06','07','08','09','10','11','12','13','today'];
+  days.forEach((d, i) => {
+    const x = padL + colW * i + (colW - barW) / 2;
+    const hTotal = (d.total / yMax) * innerH;
+    const hErr   = (d.err   / yMax) * innerH;
+    const yTotal = padT + innerH - hTotal;
+    const yErr   = padT + innerH - hErr;
+    const todayCls = (i === N-1) ? ' today' : '';
+    bHtml += `<rect class="bar${todayCls}" x="${x.toFixed(1)}" y="${yTotal.toFixed(1)}" width="${barW.toFixed(1)}" height="${hTotal.toFixed(1)}" rx="1.5" data-i="${i}" style="animation-delay:${(i*30)}ms"/>`;
+    bHtml += `<rect class="bar err" x="${x.toFixed(1)}" y="${yErr.toFixed(1)}" width="${barW.toFixed(1)}" height="${hErr.toFixed(1)}" rx="1.5" data-i="${i}" style="animation-delay:${(i*30)+120}ms"/>`;
+  });
+  bars.innerHTML = bHtml;
+
+  // x axis
+  const xaxis = document.getElementById('xaxis');
+  let xHtml = '';
+  dayLabels.forEach((lbl, i) => {
+    if (i % 2 === 0 || i === N-1) {
+      const xPos = padL + colW * i + colW/2;
+      xHtml += `<text x="${xPos.toFixed(1)}" y="${(H-padB+18)}" text-anchor="middle">${lbl}</text>`;
+    }
+  });
+  xaxis.innerHTML = xHtml;
+
+  // tooltip
+  const chart = document.getElementById('chart');
+  const xhair = document.getElementById('xhair');
+  const tt = document.getElementById('tt');
+  const ttTime = document.getElementById('tt-time');
+  const ttTotal = document.getElementById('tt-total');
+  const ttOk = document.getElementById('tt-ok');
+  const ttErr = document.getElementById('tt-err');
+  const ttCost = document.getElementById('tt-cost');
+  const fmt = n => n.toLocaleString('en-US');
+  const fmtUSD = n => '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+
+  chart.addEventListener('mousemove', (e) => {
+    const r = chart.getBoundingClientRect();
+    const px = e.clientX - r.left;
+    // map screen-x to svg index
+    const svgX = (px / r.width) * W;
+    const ratio = (svgX - padL) / innerW;
+    const i = Math.max(0, Math.min(N-1, Math.floor(ratio * N)));
+    const d = days[i];
+    const xPos = padL + colW * i + colW/2;
+    xhair.style.display = '';
+    xhair.setAttribute('x1', xPos);
+    xhair.setAttribute('x2', xPos);
+    const tipX = (xPos / W) * r.width;
+    const yPos = padT + innerH - (d.total / yMax) * innerH;
+    const tipY = (yPos / H) * r.height;
+    tt.style.left = tipX + 'px';
+    tt.style.top = tipY + 'px';
+    tt.classList.add('on');
+    ttTime.textContent = dayLabels[i] + ' Â· ' + (i === N-1 ? 'today' : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][(i+3)%7]);
+    ttTotal.textContent = fmt(d.total);
+    ttOk.textContent = fmt(d.ok);
+    ttErr.textContent = fmt(d.err);
+    ttCost.textContent = fmtUSD(d.total * 0.0001);
+  });
+  chart.addEventListener('mouseleave', () => {
+    xhair.style.display = 'none';
+    tt.classList.remove('on');
+  });
+
+  // ---------------------- live clocks ----------------------
+  function tickClock() {
+    const d = new Date();
+    const hh = String(d.getUTCHours()).padStart(2,'0');
+    const mm = String(d.getUTCMinutes()).padStart(2,'0');
+    const ss = String(d.getUTCSeconds()).padStart(2,'0');
+    const el = document.getElementById('foot-clock');
+    if (el) el.textContent = `${hh}:${mm}:${ss} UTC`;
+  }
+  tickClock(); setInterval(tickClock, 1000);
+
+  // "last request" ticker â€” drifts in 80-500ms range for the feel of a live console
+  const lastReq = document.getElementById('last-req');
+  setInterval(() => {
+    if (!lastReq) return;
+    const ms = Math.round(80 + Math.random() * 420);
+    lastReq.textContent = ms + ' ms';
+  }, 1800);
+</script>
+</body>
+</html>

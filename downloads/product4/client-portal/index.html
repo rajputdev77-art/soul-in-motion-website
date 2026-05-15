@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <main class="login-shell">
+    <div class="login-card">
+      <div class="brand-mark">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-name">Soul in Motion</span>
+      </div>
+
+      <h1 class="login-title">Welcome back.</h1>
+      <p class="login-sub">Enter the access password your project lead shared with you.</p>
+
+      <form id="loginForm" class="login-form" autocomplete="off" novalidate>
+        <label for="password" class="visually-hidden">Access password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Access password"
+          required
+          spellcheck="false"
+          autocapitalize="off"
+        />
+        <button type="submit" class="btn btn-primary">Sign In</button>
+        <p id="loginError" class="login-error" role="alert" aria-live="polite"></p>
+      </form>
+
+      <p class="login-help">
+        Trouble signing in? Reply to your latest project email and we'll resend your access details within the day.
+      </p>
+    </div>
+
+    <footer class="login-foot">
+      <span>© <span id="currentYear"></span> Soul in Motion · Client Portal v1.0</span>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

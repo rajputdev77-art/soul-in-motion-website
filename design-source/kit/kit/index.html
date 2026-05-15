@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Console Kit — AI API dashboard template · live demo</title>
+<meta name="description" content="A 5-screen HTML/CSS template for AI API consoles. Dark + light. Drop in a brand, ship the marketing site by Friday." />
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="kit.css" />
+<style>
+  .landing { max-width: 1180px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* ============== TOP RIBBON ============== */
+  .ribbon-bar {
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--border-1);
+    padding: 8px 24px;
+    text-align: center;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-2);
+    letter-spacing: 0.02em;
+  }
+  .ribbon-bar b { color: var(--fg-0); }
+  .ribbon-bar a { color: var(--accent); text-decoration: none; margin-left: 8px; }
+
+  /* ============== HERO ============== */
+  .hero { padding: 72px 0 48px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 56px; align-items: center; }
+  @media (max-width: 980px) { .hero { grid-template-columns: 1fr; gap: 32px; padding-top: 48px; } }
+
+  .hero .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--accent);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .hero .eyebrow .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--profit);
+    animation: pulse 2s var(--ease) infinite;
+  }
+  .hero h1 {
+    margin: 14px 0 14px;
+    font-size: 48px; font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--fg-0);
+  }
+  .hero h1 .hl {
+    background: linear-gradient(90deg, var(--fg-0) 0%, var(--accent) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p.lede {
+    margin: 0;
+    font-size: 16px; color: var(--fg-1);
+    line-height: 1.55;
+    max-width: 560px;
+  }
+  .hero-actions {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .price-card {
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    padding: 22px;
+    display: grid; gap: 14px;
+  }
+  .price-card .pc-head {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-2);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .price-card .pc-amount {
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .price-card .pc-amount .big {
+    font-family: var(--font-mono);
+    font-size: 40px; font-weight: 500;
+    color: var(--fg-0);
+    letter-spacing: -0.025em;
+    line-height: 1;
+  }
+  .price-card .pc-amount .strike {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--fg-3);
+    text-decoration: line-through;
+  }
+  .price-card .pc-amount .save {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--profit);
+    background: var(--profit-soft);
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .price-card ul {
+    margin: 0; padding: 0; list-style: none;
+    display: grid; gap: 6px;
+    font-size: 13px; color: var(--fg-1);
+  }
+  .price-card ul li {
+    display: grid; grid-template-columns: 14px 1fr;
+    gap: 8px; align-items: start;
+  }
+  .price-card ul li svg { color: var(--profit); margin-top: 3px; }
+  .price-card .buy {
+    width: 100%;
+    background: var(--accent);
+    color: white;
+    border: 0;
+    border-radius: var(--r-md);
+    padding: 12px;
+    font-family: var(--font-ui); font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: background var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+  }
+  .price-card .buy:hover { background: var(--accent-strong); transform: translateY(-1px); }
+  .price-card .pc-meta {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-3);
+  }
+
+  /* ============== SCREEN GRID ============== */
+  .grid-head {
+    display: flex; align-items: end; justify-content: space-between;
+    margin: 24px 0 18px;
+    gap: 16px;
+  }
+  .grid-head h2 {
+    margin: 0;
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .grid-head p {
+    margin: 4px 0 0;
+    color: var(--fg-2); font-size: 13px;
+  }
+  .grid-head .meta {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-3);
+  }
+
+  .screen-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  @media (max-width: 720px) { .screen-grid { grid-template-columns: 1fr; } }
+
+  .screen-card {
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: grid; grid-template-rows: 200px auto;
+    transition: border-color var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+  }
+  .screen-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+  .screen-card .preview {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-0);
+    border-bottom: 1px solid var(--border-1);
+  }
+  .screen-card .preview iframe {
+    border: 0;
+    width: 1320px; height: 880px;
+    transform: scale(0.35);
+    transform-origin: top left;
+    pointer-events: none;
+  }
+  .screen-card .preview::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 60%, var(--bg-1) 100%);
+    pointer-events: none;
+  }
+  .screen-card .meta {
+    padding: 16px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .screen-card .name {
+    font-size: 14px; font-weight: 600;
+    color: var(--fg-0);
+    letter-spacing: -0.005em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .screen-card .name .num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-3);
+  }
+  .screen-card .desc {
+    font-size: 12px; color: var(--fg-2);
+    margin-top: 2px;
+  }
+  .screen-card .open {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+
+  /* ============== INCLUDES ============== */
+  .includes {
+    margin-top: 56px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  @media (max-width: 780px) { .includes { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .includes { grid-template-columns: 1fr; } }
+  .includes .item {
+    background: var(--bg-1);
+    padding: 22px;
+    display: grid; gap: 6px;
+  }
+  .includes .item .ic-wrap {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: grid; place-items: center;
+    margin-bottom: 6px;
+  }
+  .includes .item h4 { margin: 0; font-size: 13px; font-weight: 600; color: var(--fg-0); }
+  .includes .item p { margin: 0; font-size: 12px; color: var(--fg-2); line-height: 1.5; }
+
+  /* ============== TEMPLATE STACK ============== */
+  .stack {
+    margin-top: 56px;
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    padding: 28px 32px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+    align-items: center;
+  }
+  @media (max-width: 760px) { .stack { grid-template-columns: 1fr; padding: 24px; gap: 20px; } }
+  .stack h3 { margin: 0 0 8px; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  .stack p { margin: 0; font-size: 13px; color: var(--fg-2); line-height: 1.6; }
+  .stack ul { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .stack ul li {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--fg-1);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .stack ul li svg { color: var(--profit); }
+
+  /* ============== FAQ ============== */
+  .faq-mini {
+    margin-top: 56px;
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--bg-1);
+  }
+  details.q {
+    border-bottom: 1px solid var(--border-1);
+  }
+  details.q:last-child { border-bottom: 0; }
+  details.q summary {
+    padding: 16px 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    font-size: 14px; font-weight: 500;
+    color: var(--fg-0);
+    list-style: none;
+  }
+  details.q summary::-webkit-details-marker { display: none; }
+  details.q summary .arrow {
+    color: var(--fg-3);
+    transition: transform var(--t-base) var(--ease);
+  }
+  details.q[open] summary .arrow { transform: rotate(180deg); color: var(--fg-1); }
+  details.q .answer {
+    padding: 0 22px 18px;
+    font-size: 13px; color: var(--fg-1);
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  /* ============== FINAL CTA ============== */
+  .final {
+    margin-top: 72px;
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+  }
+  .final h2 { margin: 0 0 8px; font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+  .final p { margin: 0 0 20px; color: var(--fg-2); font-size: 14px; }
+
+  /* ============== SIMPLE TOPBAR ============== */
+  .land-top {
+    height: 56px;
+    border-bottom: 1px solid var(--border-1);
+    background: var(--bg-0);
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+  }
+  .land-top .brand { display: flex; align-items: center; gap: 10px; }
+  .land-top .right { margin-left: auto; display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-2); }
+  .land-top .right a { color: var(--fg-1); text-decoration: none; padding: 6px 10px; border-radius: var(--r-md); }
+  .land-top .right a:hover { color: var(--fg-0); background: var(--bg-2); }
+  .land-top .right a.buy {
+    background: var(--accent); color: white;
+    padding: 7px 14px;
+  }
+  .land-top .right a.buy:hover { background: var(--accent-strong); }
+</style>
+</head>
+<body>
+
+<div class="ribbon-bar">
+  <b>Launch week —</b> 30% off through Sunday with code <b style="font-family:var(--font-mono);background:var(--bg-2);padding:1px 6px;border-radius:3px;">LAUNCH30</b>
+  <a href="#buy">claim →</a>
+</div>
+
+<header class="land-top">
+  <div class="brand">
+    <div class="logo-mark">⟁</div>
+    <div class="wordmark">console<span class="slash">/</span><span class="sub">kit</span></div>
+  </div>
+  <div class="right">
+    <a href="#screens">screens</a>
+    <a href="#includes">includes</a>
+    <a href="#faq">faq</a>
+    <a class="buy" href="#buy">Buy · $49</a>
+  </div>
+</header>
+
+<main class="landing">
+
+  <!-- ============== HERO ============== -->
+  <section class="hero">
+    <div>
+      <span class="eyebrow"><span class="pulse"></span>live demo · click any screen</span>
+      <h1>An AI API console template that <span class="hl">doesn't look like a Tailwind UI clone.</span></h1>
+      <p class="lede">Five fully-built screens. Hand-tuned dark and light modes, real interactivity, a generated chart with tooltip, a live-tail logs view, and zero AI-slop gradients. Drop in your brand and ship the marketing site by Friday.</p>
+
+      <div class="hero-actions">
+        <a href="01-Console.html" class="btn primary lg">
+          <svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          Tour the dashboard →
+        </a>
+        <a href="#buy" class="btn lg">
+          Buy on Gumroad — $49
+        </a>
+      </div>
+
+      <div style="margin-top:20px;font-family:var(--font-mono);font-size:11px;color:var(--fg-3);display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span><span style="color:var(--profit);">●</span> static HTML + CSS</span>
+        <span>·</span>
+        <span>dark + light</span>
+        <span>·</span>
+        <span>MIT-for-product</span>
+        <span>·</span>
+        <span>no deps</span>
+      </div>
+    </div>
+
+    <!-- price card -->
+    <div class="price-card" id="buy">
+      <div class="pc-head">Console Kit · v1.0</div>
+      <div class="pc-amount">
+        <span class="big">$49</span>
+        <span class="strike">$79</span>
+        <span class="save">−38%</span>
+      </div>
+      <ul>
+        <li><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span><b style="color:var(--fg-0)">5 screens</b> · console, logs, sign-in, empty state, pricing</span></li>
+        <li><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Dark <b style="color:var(--fg-0)">and</b> light modes</span></li>
+        <li><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Tokenized design system in one CSS file</span></li>
+        <li><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Real interactivity — no framework, no build step</span></li>
+        <li><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Free updates for v1.x</span></li>
+      </ul>
+      <button class="buy" onclick="window.open('https://gumroad.com', '_blank')">
+        Buy on Gumroad →
+      </button>
+      <div class="pc-meta">14-day refund · pay once · unlimited projects</div>
+    </div>
+  </section>
+
+  <!-- ============== SCREENS ============== -->
+  <section id="screens">
+    <div class="grid-head">
+      <div>
+        <h2>Five screens.</h2>
+        <p>Open each in a new tab to feel the interactivity — the chart tooltip, the live-tail logs, the theme toggle, the env switch.</p>
+      </div>
+      <div class="meta">v1.0 · 5 / 5</div>
+    </div>
+
+    <div class="screen-grid">
+      <a class="screen-card" href="01-Console.html">
+        <div class="preview"><iframe src="01-Console.html" loading="lazy" scrolling="no"></iframe></div>
+        <div class="meta">
+          <div>
+            <div class="name"><span class="num">01</span>Console — overview</div>
+            <div class="desc">KPI row · request chart · keys table · docs panel · billing</div>
+          </div>
+          <span class="open">open →</span>
+        </div>
+      </a>
+
+      <a class="screen-card" href="02-Logs.html">
+        <div class="preview"><iframe src="02-Logs.html" loading="lazy" scrolling="no"></iframe></div>
+        <div class="meta">
+          <div>
+            <div class="name"><span class="num">02</span>Logs — live request inspector</div>
+            <div class="desc">Live-tail · filter chips · row select · waterfall · req/res body</div>
+          </div>
+          <span class="open">open →</span>
+        </div>
+      </a>
+
+      <a class="screen-card" href="03-Empty.html">
+        <div class="preview"><iframe src="03-Empty.html" loading="lazy" scrolling="no"></iframe></div>
+        <div class="meta">
+          <div>
+            <div class="name"><span class="num">03</span>Empty state — day-0 onboarding</div>
+            <div class="desc">Four-step checklist · code preview · resources grid</div>
+          </div>
+          <span class="open">open →</span>
+        </div>
+      </a>
+
+      <a class="screen-card" href="04-SignIn.html">
+        <div class="preview"><iframe src="04-SignIn.html" loading="lazy" scrolling="no"></iframe></div>
+        <div class="meta">
+          <div>
+            <div class="name"><span class="num">04</span>Sign in — split layout</div>
+            <div class="desc">SSO + email · testimonial aside · spend receipt preview</div>
+          </div>
+          <span class="open">open →</span>
+        </div>
+      </a>
+
+      <a class="screen-card" href="05-Pricing.html" style="grid-column: 1 / -1;">
+        <div class="preview" style="height:240px;"><iframe src="05-Pricing.html" loading="lazy" scrolling="no"></iframe></div>
+        <div class="meta">
+          <div>
+            <div class="name"><span class="num">05</span>Pricing — 3 tiers + compare matrix</div>
+            <div class="desc">Monthly/annual toggle · featured ribbon · full feature compare table · FAQ accordion</div>
+          </div>
+          <span class="open">open →</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============== INCLUDES ============== -->
+  <section id="includes">
+    <div class="grid-head" style="margin-top:56px;">
+      <div>
+        <h2>What's in the zip.</h2>
+        <p>Everything you need to ship. No node_modules, no Tailwind config, no build step.</p>
+      </div>
+    </div>
+    <div class="includes">
+      <div class="item">
+        <div class="ic-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h4>5 HTML files</h4>
+        <p>One per screen. Open in a browser, edit in any editor.</p>
+      </div>
+      <div class="item">
+        <div class="ic-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+        </div>
+        <h4>Tokens.css</h4>
+        <p>One file, every color · type · spacing variable. Swap brand in 60s.</p>
+      </div>
+      <div class="item">
+        <div class="ic-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        </div>
+        <h4>Dark + light</h4>
+        <p>Both modes hand-tuned per screen. Toggle persists in localStorage.</p>
+      </div>
+      <div class="item">
+        <div class="ic-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h4>No build step</h4>
+        <p>Vanilla HTML + CSS + 60 lines of JS. Drop in any stack.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== STACK ============== -->
+  <section class="stack">
+    <div>
+      <h3>For builders who don't have time for another Tailwind config.</h3>
+      <p>If you have a real product to ship and you just need an admin UI that looks like Linear, Stripe, or Vercel — buy this, rename the brand, swap the favicon, edit two tokens, and move on with your week.</p>
+    </div>
+    <div>
+      <ul>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Inter + JetBrains Mono (Google Fonts CDN)</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>~100 lucide-style inline SVGs (free)</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>~2000 lines of CSS · ~400 of JS · 0 deps</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Responsive 320 → 1920+</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Buyers may use in unlimited personal &amp; commercial projects</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============== FAQ ============== -->
+  <section id="faq">
+    <div class="grid-head" style="margin-top:56px;">
+      <div>
+        <h2>Questions buyers ask.</h2>
+      </div>
+    </div>
+    <div class="faq-mini">
+      <details class="q" open>
+        <summary>Is there a Next.js / React version?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">Not yet — v1 ships as plain HTML/CSS so it drops into any stack. A Next.js + Tailwind port is coming as a free upgrade for early buyers (target: 60 days).</div>
+      </details>
+      <details class="q">
+        <summary>What's the license?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">Use the kit in unlimited personal and commercial projects. You can't resell the kit itself or use it to build a competing template. Full license bundled in the zip.</div>
+      </details>
+      <details class="q">
+        <summary>Refunds?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">14 days, no questions asked. Email and it's refunded same day.</div>
+      </details>
+      <details class="q">
+        <summary>Will you add more screens?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">Yes — settings, team/roles, webhook config, and a model picker are on the roadmap. All free for v1 buyers.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============== FINAL CTA ============== -->
+  <section class="final">
+    <h2>Ship the marketing site by Friday.</h2>
+    <p>$49 · 5 screens · pay once · works in every browser since 2020.</p>
+    <button class="buy" onclick="window.open('https://gumroad.com', '_blank')" style="background:var(--accent);color:white;border:0;border-radius:var(--r-md);padding:14px 28px;font-family:var(--font-ui);font-size:14px;font-weight:600;cursor:pointer;">
+      Buy on Gumroad — $49 →
+    </button>
+  </section>
+
+  <div class="foot" style="padding-top:48px;">
+    <span>console/kit v1.0</span><span class="sep">·</span>
+    <a href="#">@yourhandle</a><span class="sep">·</span>
+    <a href="#">support@yourdomain.com</a>
+  </div>
+</main>
+
+<script>
+  // theme persist (the demo deliberately leaves the toolbar minimal; the screens have their own toggles)
+  try { const t = localStorage.getItem('axon_theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch(e){}
+</script>
+</body>
+</html>

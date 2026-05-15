@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>axon/api — pricing</title>
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="kit.css" />
+<style>
+  .pricing-page {
+    max-width: 1240px; margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: grid; gap: 56px;
+  }
+  .pricing-hero { text-align: center; display: grid; gap: 14px; justify-items: center; }
+  .pricing-hero .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--accent);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .pricing-hero h1 {
+    margin: 0;
+    font-size: 40px; font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    max-width: 720px;
+  }
+  .pricing-hero p {
+    margin: 0; font-size: 15px; color: var(--fg-1);
+    line-height: 1.55; max-width: 580px;
+  }
+
+  /* billing toggle */
+  .billing-toggle {
+    display: inline-flex;
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: 999px;
+    padding: 3px;
+    position: relative;
+  }
+  .billing-toggle button {
+    background: transparent; border: 0;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 999px;
+    color: var(--fg-2);
+    cursor: pointer;
+    transition: color var(--t-base) var(--ease);
+  }
+  .billing-toggle button.active {
+    background: var(--bg-3); color: var(--fg-0);
+  }
+  .billing-toggle .save {
+    margin-left: 6px;
+    font-size: 10px;
+    color: var(--profit);
+    background: var(--profit-soft);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* cards */
+  .tiers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+  @media (max-width: 980px) { .tiers { grid-template-columns: 1fr; } }
+  .tier {
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 18px;
+    position: relative;
+    transition: border-color var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+  }
+  .tier:hover { border-color: var(--border-2); transform: translateY(-2px); }
+  .tier.featured {
+    border-color: var(--accent-edge);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  .tier .ribbon {
+    position: absolute; top: -10px; right: 20px;
+    background: var(--accent);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: var(--r-sm);
+  }
+  .tier h2 {
+    margin: 0;
+    font-size: 18px; font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg-0);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tier .blurb {
+    font-size: 13px; color: var(--fg-2);
+    line-height: 1.5;
+    min-height: 38px;
+  }
+  .tier .price {
+    display: flex; align-items: baseline; gap: 6px;
+    margin-top: -4px;
+  }
+  .tier .price .v {
+    font-family: var(--font-mono);
+    font-size: 38px; font-weight: 500;
+    letter-spacing: -0.025em;
+    color: var(--fg-0);
+    line-height: 1;
+  }
+  .tier .price .unit {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-2);
+  }
+  .tier .price.custom .v {
+    font-family: var(--font-ui);
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  .tier .cta {
+    width: 100%;
+    padding: 11px;
+    font-family: var(--font-ui); font-size: 13px; font-weight: 600;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-2);
+    background: var(--bg-1);
+    color: var(--fg-0);
+    cursor: pointer;
+    transition: border-color var(--t-base) var(--ease), background var(--t-base) var(--ease);
+  }
+  .tier .cta:hover { border-color: var(--border-3); background: var(--bg-2); }
+  .tier .cta.primary {
+    background: var(--fg-0);
+    color: var(--bg-0);
+    border-color: var(--fg-0);
+  }
+  .tier .cta.primary:hover { background: var(--fg-1); border-color: var(--fg-1); }
+
+  .feat-list {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: grid; gap: 10px;
+  }
+  .feat-list li {
+    display: grid;
+    grid-template-columns: 16px 1fr;
+    align-items: start;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--fg-1);
+    line-height: 1.4;
+  }
+  .feat-list li .check {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--profit-soft);
+    color: var(--profit);
+    display: grid; place-items: center;
+    margin-top: 1px;
+  }
+  .feat-list li.muted .check {
+    background: var(--bg-2);
+    color: var(--fg-3);
+  }
+  .feat-list li.muted { color: var(--fg-3); }
+  .feat-list li b {
+    color: var(--fg-0);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .feat-list .sep {
+    height: 1px; background: var(--border-1);
+    margin: 4px 0;
+    grid-column: 1 / -1;
+  }
+  .feat-list-label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-3);
+    grid-column: 1 / -1;
+    padding-top: 4px;
+  }
+
+  /* COMPARE TABLE */
+  .compare-wrap {
+    background: var(--bg-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  table.compare {
+    width: 100%; border-collapse: collapse;
+    font-family: var(--font-ui); font-size: 13px;
+  }
+  table.compare thead th {
+    text-align: left;
+    padding: 14px 18px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-2);
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border-1);
+  }
+  table.compare thead th.center { text-align: center; }
+  table.compare tbody td {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-1);
+    color: var(--fg-1);
+    vertical-align: middle;
+  }
+  table.compare tbody td.center { text-align: center; }
+  table.compare tbody tr:last-child td { border-bottom: 0; }
+  table.compare tbody tr.group-row td {
+    background: var(--bg-0);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-2);
+    padding: 8px 18px;
+  }
+  table.compare .check-cell {
+    display: inline-grid; place-items: center;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--profit-soft);
+    color: var(--profit);
+  }
+  table.compare .x-cell { color: var(--fg-3); }
+  table.compare .ann { color: var(--fg-0); font-family: var(--font-mono); font-size: 12px; }
+
+  /* FAQ */
+  .faq {
+    display: grid; gap: 0;
+    border: 1px solid var(--border-1);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--bg-1);
+  }
+  details.q {
+    border-bottom: 1px solid var(--border-1);
+  }
+  details.q:last-child { border-bottom: 0; }
+  details.q summary {
+    padding: 16px 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    font-size: 14px; font-weight: 500;
+    color: var(--fg-0);
+    list-style: none;
+  }
+  details.q summary::-webkit-details-marker { display: none; }
+  details.q summary .arrow {
+    color: var(--fg-3);
+    transition: transform var(--t-base) var(--ease);
+  }
+  details.q[open] summary .arrow { transform: rotate(180deg); color: var(--fg-1); }
+  details.q .answer {
+    padding: 0 22px 18px;
+    font-size: 13px; color: var(--fg-1);
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  .section-title {
+    text-align: center;
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 6px;
+  }
+  .section-sub {
+    text-align: center;
+    color: var(--fg-2);
+    font-size: 13px;
+    margin: 0 0 24px;
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo-mark">⟁</div>
+    <div class="wordmark">axon<span class="slash">/</span><span class="sub">api</span></div>
+  </div>
+  <nav class="topnav">
+    <a href="01-Console.html">overview</a>
+    <a href="#">keys</a>
+    <a href="#">docs</a>
+    <a href="02-Logs.html">logs</a>
+    <a class="active" href="05-Pricing.html">billing</a>
+    <a href="#">team</a>
+  </nav>
+  <div class="top-right">
+    <button class="search-trigger">
+      <svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>search docs, keys…</span>
+      <span class="kbd">⌘K</span>
+    </button>
+    <button class="icon-btn" id="theme-toggle">
+      <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+    <div class="avatar">RN</div>
+  </div>
+</header>
+
+<main class="pricing-page">
+
+  <section class="pricing-hero">
+    <span class="eyebrow">pricing · usage-based</span>
+    <h1>Pay for what you ship. Nothing else.</h1>
+    <p>Start free. Move to Team when you outgrow it. Talk to us when you need on-prem or a custom SLA.</p>
+    <div class="billing-toggle" id="billing-toggle" style="margin-top:8px;">
+      <button data-cycle="month">Monthly</button>
+      <button class="active" data-cycle="year">Annual<span class="save">−20%</span></button>
+    </div>
+  </section>
+
+  <!-- ============== TIERS ============== -->
+  <section class="tiers">
+
+    <!-- Builder -->
+    <div class="tier">
+      <div>
+        <h2>Builder <span class="pill muted">free</span></h2>
+        <p class="blurb">For weekend builds and proof-of-concepts. No card.</p>
+      </div>
+      <div class="price">
+        <span class="v">$0</span>
+        <span class="unit">/ month</span>
+      </div>
+      <button class="cta">Get started →</button>
+      <ul class="feat-list">
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>5M</b> requests / month included</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>$0.40</b> / 1k overage</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Up to <b>5</b> seats</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Live + test envs, key rotation, basic logs (7d)</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Community Discord support</span></li>
+      </ul>
+    </div>
+
+    <!-- Team (featured) -->
+    <div class="tier featured">
+      <span class="ribbon">most popular</span>
+      <div>
+        <h2>Team</h2>
+        <p class="blurb">For startups shipping to real users. Per-customer billing &amp; webhooks.</p>
+      </div>
+      <div class="price">
+        <span class="v" id="team-price">$79</span>
+        <span class="unit" id="team-unit">/ month, billed annually</span>
+      </div>
+      <button class="cta primary">Start 14-day trial →</button>
+      <ul class="feat-list">
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Everything in Builder, plus:</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>50M</b> requests / month · <b>$0.25</b> / 1k overage</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>Per-customer</b> usage attribution + Stripe pass-through billing</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Webhooks: failures, budgets, key rotations</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Logs retention <b>30 days</b>, audit log, role-based access</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Email support · <b>24h</b> response</span></li>
+      </ul>
+    </div>
+
+    <!-- Scale -->
+    <div class="tier">
+      <div>
+        <h2>Scale</h2>
+        <p class="blurb">For series-A and up. Custom SLA, dedicated region, on-prem option.</p>
+      </div>
+      <div class="price custom">
+        <span class="v">Custom</span>
+      </div>
+      <button class="cta">Talk to sales →</button>
+      <ul class="feat-list">
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Everything in Team, plus:</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>Volume pricing</b> from $0.08 / 1k</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>Dedicated</b> region · on-prem deploy option</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>SOC2 II, HIPAA BAA, DPA, security questionnaires</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>SSO/SAML, SCIM provisioning</span></li>
+        <li><span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>99.99% SLA</b> · Slack channel · 1h response</span></li>
+      </ul>
+    </div>
+
+  </section>
+
+  <!-- ============== COMPARE ============== -->
+  <section>
+    <h2 class="section-title">Compare every line</h2>
+    <p class="section-sub">The full feature matrix for finance and ops.</p>
+
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th style="width:34%">Feature</th>
+            <th class="center" style="width:22%">Builder</th>
+            <th class="center" style="width:22%">Team</th>
+            <th class="center" style="width:22%">Scale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group-row"><td colspan="4">Usage &amp; pricing</td></tr>
+          <tr><td>Requests included / month</td><td class="center ann">5M</td><td class="center ann">50M</td><td class="center ann">Volume</td></tr>
+          <tr><td>Overage rate</td><td class="center ann">$0.40 / 1k</td><td class="center ann">$0.25 / 1k</td><td class="center ann">from $0.08</td></tr>
+          <tr><td>Team seats</td><td class="center ann">5</td><td class="center ann">25</td><td class="center ann">Unlimited</td></tr>
+          <tr><td>Environments</td><td class="center ann">live + test</td><td class="center ann">live + test + 3 staging</td><td class="center ann">Custom</td></tr>
+
+          <tr class="group-row"><td colspan="4">Observability</td></tr>
+          <tr><td>Request log retention</td><td class="center ann">7 days</td><td class="center ann">30 days</td><td class="center ann">1 year</td></tr>
+          <tr><td>Per-customer attribution</td><td class="center"><span class="x-cell">—</span></td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>Audit log + role-based access</td><td class="center"><span class="x-cell">—</span></td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>Webhooks (failures, budgets)</td><td class="center"><span class="x-cell">—</span></td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+
+          <tr class="group-row"><td colspan="4">Security &amp; compliance</td></tr>
+          <tr><td>SSO / SAML / SCIM</td><td class="center"><span class="x-cell">—</span></td><td class="center"><span class="x-cell">—</span></td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>SOC2 II report</td><td class="center"><span class="x-cell">—</span></td><td class="center ann">on request</td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+          <tr><td>HIPAA BAA · on-prem</td><td class="center"><span class="x-cell">—</span></td><td class="center"><span class="x-cell">—</span></td><td class="center"><span class="check-cell"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td></tr>
+
+          <tr class="group-row"><td colspan="4">Support</td></tr>
+          <tr><td>Channel</td><td class="center ann">community</td><td class="center ann">email</td><td class="center ann">Slack + email</td></tr>
+          <tr><td>SLA · response time</td><td class="center"><span class="x-cell">—</span></td><td class="center ann">24h</td><td class="center ann">1h · 99.99%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============== FAQ ============== -->
+  <section style="max-width:880px;margin:0 auto;width:100%;">
+    <h2 class="section-title">Common questions</h2>
+    <p class="section-sub">Three sentences each. If we lied, write to <a href="#" style="color:var(--accent);text-decoration:none;">honesty@axon.run</a>.</p>
+
+    <div class="faq">
+      <details class="q" open>
+        <summary>What counts as a "request"?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">Every successful call (2xx) to any inference endpoint — completions, embeddings, rerank, streaming. Errors and rate-limited 429s don't count. Listing endpoints (GET /models, /usage, /keys) don't count either.</div>
+      </details>
+      <details class="q">
+        <summary>Can I cap spend per key?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">Yes. Every key has a hard ceiling, a soft warning, and a daily budget. Webhooks fire on each threshold; requests over the ceiling return 402 Payment Required with a clear error body.</div>
+      </details>
+      <details class="q">
+        <summary>What's the difference between Team and Scale?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">Team is self-serve and runs on shared infrastructure in iad-1. Scale gets a dedicated region, an SLA, SSO/SCIM, the SOC2 II report, and a named CSM. Most companies switch when they need to pass a security review.</div>
+      </details>
+      <details class="q">
+        <summary>Do you charge for failed requests?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">Never. 4xx and 5xx responses are free. If we time out before forwarding to the model, you pay nothing.</div>
+      </details>
+      <details class="q">
+        <summary>Can I migrate off?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">Yes. axon is API-compatible with OpenAI's interface — change the base URL and you're back. Export your logs as CSV or Parquet from any plan.</div>
+      </details>
+      <details class="q">
+        <summary>How is "Team" priced annually?<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></summary>
+        <div class="answer">$79/month if paid up front for the year, $99/month if paid monthly. Annual saves you $240/year and locks the included-volume tier for 12 months.</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============== BOTTOM CTA ============== -->
+  <section style="text-align:center;padding:20px 0 0;">
+    <h2 style="margin:0 0 8px;font-size:22px;letter-spacing:-0.015em;">Still deciding?</h2>
+    <p style="margin:0 0 16px;color:var(--fg-2);font-size:13px;">Book a 15-minute walkthrough. We'll show you the dashboard with your real traffic.</p>
+    <button class="btn primary lg">Book a demo →</button>
+  </section>
+
+  <div class="foot">
+    <span>axon/api v3.41.2</span><span class="sep">·</span>
+    <a href="#">status</a><span class="sep">·</span>
+    <a href="#">changelog</a><span class="sep">·</span>
+    <a href="#">terms</a>
+  </div>
+</main>
+
+<script>
+  // theme
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('theme-toggle');
+  function applyThemeIcons() {
+    const dark = root.getAttribute('data-theme') === 'dark';
+    themeBtn.querySelector('.theme-icon-dark').style.display  = dark ? '' : 'none';
+    themeBtn.querySelector('.theme-icon-light').style.display = dark ? 'none' : '';
+  }
+  try { const t = localStorage.getItem('axon_theme'); if (t) root.setAttribute('data-theme', t); } catch(e){}
+  applyThemeIcons();
+  themeBtn.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('axon_theme', next); } catch(e){}
+    applyThemeIcons();
+  });
+
+  // billing toggle
+  const billing = document.getElementById('billing-toggle');
+  const teamPrice = document.getElementById('team-price');
+  const teamUnit = document.getElementById('team-unit');
+  billing.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    billing.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    if (b.dataset.cycle === 'year') {
+      teamPrice.textContent = '$79';
+      teamUnit.textContent  = '/ month, billed annually';
+    } else {
+      teamPrice.textContent = '$99';
+      teamUnit.textContent  = '/ month';
+    }
+  });
+</script>
+</body>
+</html>
